@@ -1,0 +1,23 @@
+#GUI界面显示
+gui显示物品:
+  手动配置:
+    amount: 1
+    material: GRASS
+    name: "example"
+    lore:
+      - "example"
+      - "example2"
+  自动配置:
+    xxx
+#奖励物品预处理
+物品预处理列表:
+  物品1:
+    手动配置:
+      material: STONE
+    自动配置:
+      xxx
+#奖励
+奖励:
+  - 给物品 物品1
+  - 运行指令 mm give xxxx
+  - 广播 恭喜(player)获得大奖!

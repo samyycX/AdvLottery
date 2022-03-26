@@ -1,0 +1,7 @@
+name: advLottery
+version: '${project.version}'
+main: com.samyyc.lottery.Lottery
+commands:
+  advlottery:
+
+softdepend: [Vault, PlayerPoints, PlaceholderAPI]
