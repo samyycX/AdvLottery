@@ -1,4 +1,4 @@
-package com.samyyc.lottery;
+package com.samyyc.lottery.objects;
 
 import org.bukkit.entity.Player;
 

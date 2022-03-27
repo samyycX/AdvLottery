@@ -1,8 +1,8 @@
 package com.samyyc.lottery.miscs;
 
-import com.samyyc.lottery.LotteryPool;
+import com.samyyc.lottery.objects.LotteryPool;
+import com.samyyc.lottery.containers.PoolContainer;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class AdvLotteryExpansion extends PlaceholderExpansion {
@@ -36,7 +36,7 @@ public class AdvLotteryExpansion extends PlaceholderExpansion {
         String[] args = identifier.split("_",3);
         String poolname = args[1];
         String rewardName = args[2];
-        LotteryPool lotteryPool = new LotteryPool(poolname, false, player);
+        LotteryPool lotteryPool = PoolContainer.getPool(poolname);
 
         return lotteryPool.getRewardData(player, identifier);
     }

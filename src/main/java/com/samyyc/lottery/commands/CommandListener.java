@@ -1,9 +1,11 @@
 package com.samyyc.lottery.commands;
 
-import com.samyyc.lottery.LotteryInventory;
-import com.samyyc.lottery.LotteryPool;
-import com.samyyc.lottery.LotteryReward;
+import com.samyyc.lottery.objects.LotteryInventory;
+import com.samyyc.lottery.objects.LotteryPool;
+import com.samyyc.lottery.objects.LotteryReward;
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.containers.PoolContainer;
+import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
 import com.samyyc.lottery.utils.WarningUtil;
@@ -27,7 +29,7 @@ public class CommandListener implements CommandExecutor {
                 ExtraUtils.printHelpToPlayer(player);
             case "open":
                 if (LotteryPool.checkExist(args[1])) {
-                    lotteryPool = new LotteryPool(args[1], false, player);
+                    lotteryPool = PoolContainer.getPool(args[1]);
                     lotteryPool.showLotteryPool(player);
                 } else {
                     sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c未知的奖池: "+args[1]));
@@ -42,11 +44,11 @@ public class CommandListener implements CommandExecutor {
                         // args[3] = "奖品ID"
                         switch (args[2].toLowerCase()) {
                             case "create":
-                                lotteryPool = new LotteryPool(args[1], true, sender);
+                                PoolContainer.addPool(args[1], true);
                                 sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&a奖池创建成功!"));
                                 break;
                             case "addreward":
-                                lotteryPool = new LotteryPool(args[1], true, sender);
+                                lotteryPool = PoolContainer.getPool(args[1]);
                                 String rewardName = args[3];
                                 lotteryPool.initializeReward(rewardName);
                                 sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&a奖品添加成功!&c(如果奖品已在配置中存在，将不会做出任何改变)"));
@@ -71,14 +73,14 @@ public class CommandListener implements CommandExecutor {
                         LotteryReward reward;
                         switch ( args[2].toLowerCase()) {
                             case "create":
-                                reward = new LotteryReward(rewardName);
+                                reward = RewardContainer.getReward(rewardName);
                                 break;
                             case "setdisplayitem":
-                                reward = new LotteryReward(rewardName);
+                                reward = RewardContainer.getReward(rewardName);
                                 reward.setDisplayItem(player.getInventory().getItemInMainHand());
                                 break;
                             case "setitem":
-                                reward = new LotteryReward(rewardName);
+                                reward = RewardContainer.getReward(rewardName);
                                 reward.setItem(args[3], player.getInventory().getItemInMainHand());
                                 break;
                         }

@@ -1,8 +1,7 @@
 package com.samyyc.lottery.utils;
 
 import com.samyyc.lottery.Lottery;
-import com.samyyc.lottery.LotteryData;
-import com.samyyc.lottery.LotteryReward;
+import com.samyyc.lottery.objects.LotteryData;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,8 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.FileUtil;
-import sun.applet.Main;
 
 import java.io.File;
 import java.util.*;

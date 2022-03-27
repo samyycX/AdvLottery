@@ -1,7 +1,7 @@
 package com.samyyc.lottery.configs;
 
-import com.samyyc.lottery.LotteryResult;
-import com.samyyc.lottery.LotteryReward;
+import com.samyyc.lottery.objects.LotteryResult;
+import com.samyyc.lottery.objects.LotteryReward;
 import com.samyyc.lottery.apis.CustomLotteryTask;
 import com.samyyc.lottery.utils.TextUtil;
 import org.bukkit.entity.Player;

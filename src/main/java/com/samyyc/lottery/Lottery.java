@@ -2,6 +2,8 @@ package com.samyyc.lottery;
 
 import com.samyyc.lottery.apis.APIManager;
 import com.samyyc.lottery.commands.CommandListener;
+import com.samyyc.lottery.containers.PoolContainer;
+import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.listeners.lotteryGUIListener;
 import com.samyyc.lottery.miscs.AdvLotteryExpansion;
 import com.samyyc.lottery.utils.APIUtils;
@@ -41,7 +43,8 @@ public final class Lottery extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        PoolContainer.destroy();
+        RewardContainer.destroy();
     }
 
     public static APIManager getAPI() {

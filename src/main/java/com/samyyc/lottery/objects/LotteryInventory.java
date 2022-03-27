@@ -1,9 +1,10 @@
-package com.samyyc.lottery;
+package com.samyyc.lottery.objects;
 
+import com.samyyc.lottery.Lottery;
+import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.utils.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -13,7 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +52,7 @@ public class LotteryInventory {
             inventoryMap.put(0, Bukkit.createInventory(null, 54, TextUtil.convertColor("&b抽奖背包 - &e"+player.getName()+" - &a第1页")));
             for ( int i = 0; i < keyList.size(); i++) {
                 String rewardName = keyList.get(i);
-                LotteryReward reward = new LotteryReward(rewardName);
+                LotteryReward reward = RewardContainer.getReward(rewardName);
                 Inventory inventory = inventoryMap.get(0);
                 inventory.setItem(i, reward.getDisplayItem());
                 inventoryMap.put(0, inventory);
@@ -64,7 +64,7 @@ public class LotteryInventory {
                 for (int j = 0; j < 54 - 9; j++) {
                     try {
                         String rewardName = keyList.get(j + (54 - 9) * i);
-                        LotteryReward reward = new LotteryReward(rewardName);
+                        LotteryReward reward = RewardContainer.getReward(rewardName);
                         inventory.setItem(j, reward.getDisplayItem());
                     } catch (IndexOutOfBoundsException e) {
 
@@ -142,7 +142,7 @@ public class LotteryInventory {
             player.openInventory(getInventory(page + 1));
         } else {
             slot = slot + (54-9) * page;
-            LotteryReward reward = new LotteryReward(keyList.get(slot));
+            LotteryReward reward = RewardContainer.getReward(keyList.get(slot));
             reward.execute(player);
             removeReward(slot, page);
         }

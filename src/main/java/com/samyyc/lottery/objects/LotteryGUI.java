@@ -1,6 +1,8 @@
-package com.samyyc.lottery;
+package com.samyyc.lottery.objects;
 
+import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.runnables.ScriptRunnable;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
@@ -34,7 +36,7 @@ public class LotteryGUI {
     private Player player;
 
     public LotteryGUI(String title, Player player) {
-        this.pool = new LotteryPool(title, false);
+        this.pool = PoolContainer.getPool(title);
         pool.invalidFilter(player);
         this.poolName = pool.getName();
         this.GUIName = pool.getGUIName();

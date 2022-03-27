@@ -1,10 +1,10 @@
-package com.samyyc.lottery;
+package com.samyyc.lottery.objects;
 
+import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
-import com.samyyc.lottery.utils.Calculator;
+import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -43,7 +43,7 @@ public class LotteryData {
         this.poolConfig = poolConfig;
         this.player = player;
         this.poolName = poolName;
-        reward = new LotteryReward(rewardName);
+        reward = RewardContainer.getReward(rewardName);
         file = new File(Lottery.getInstance().getDataFolder(), "数据/"+poolName+".yml");
         if (!file.exists()) {
             refreshFile(poolName, file);
@@ -394,7 +394,7 @@ public class LotteryData {
                     if (configLimit != 0 && configLimit != -1 && playerLimit > configLimit) {
                     } else {
                         playerTime = 0;
-                        LotteryReward reward = new LotteryReward(rewardName);
+                        LotteryReward reward = RewardContainer.getReward(rewardName);
                         GlobalConfig.floorList.put(player.getName(), reward);
                         playerTime2++;
                         playerSection.set("玩家已出保底数量", playerLimit);
@@ -440,9 +440,7 @@ public class LotteryData {
             file.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
-            return;
         }
-        LotteryPool pool = new LotteryPool(poolname, false);
 
     }
 

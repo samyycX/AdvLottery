@@ -1,4 +1,4 @@
-package com.samyyc.lottery;
+package com.samyyc.lottery.objects;
 
 import com.samyyc.lottery.miscs.VariableKeyValue;
 import com.samyyc.lottery.utils.ExtraUtils;

@@ -1,5 +1,6 @@
-package com.samyyc.lottery;
+package com.samyyc.lottery.objects;
 
+import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
@@ -12,7 +13,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.Permissible;
 import org.bukkit.util.FileUtil;
 
 import java.io.File;
@@ -41,8 +41,6 @@ public class LotteryPool {
 
     private HashMap<LotteryData, Integer> lotteryChanceMap = new HashMap<>();
 
-    // 初始化参数
-    private boolean successfullyInitialized = false;
     // 前置条件
     private List<String> requirement = new ArrayList<>();
     private List<String> playerRefreshRequirement = new ArrayList<>();
@@ -61,18 +59,6 @@ public class LotteryPool {
     public LotteryPool(String poolname, boolean isOp) {
         this.name = poolname;
         initialize(false, isOp, null);
-    }
-    /**
-     *
-     * 构造器
-     * @param poolname 奖池名称
-     * @param isOp 玩家是否为op, 如果为true, 则创建配置
-     * @param sender 发送者(可选参数)
-     */
-    public LotteryPool(String poolname, boolean isOp, CommandSender sender) {
-        this.name = poolname;
-        this.sender = sender;
-        initialize(false, isOp, sender);
     }
 
     public void invalidFilter(Player player) {

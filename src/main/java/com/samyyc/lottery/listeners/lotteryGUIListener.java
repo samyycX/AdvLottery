@@ -1,8 +1,8 @@
 package com.samyyc.lottery.listeners;
 
-import com.samyyc.lottery.LotteryGUI;
-import com.samyyc.lottery.LotteryInventory;
-import com.samyyc.lottery.LotteryResult;
+import com.samyyc.lottery.objects.LotteryGUI;
+import com.samyyc.lottery.objects.LotteryInventory;
+import com.samyyc.lottery.objects.LotteryResult;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.TextUtil;
 import org.bukkit.Material;

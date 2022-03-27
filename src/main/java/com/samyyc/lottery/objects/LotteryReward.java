@@ -1,5 +1,6 @@
-package com.samyyc.lottery;
+package com.samyyc.lottery.objects;
 
+import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
