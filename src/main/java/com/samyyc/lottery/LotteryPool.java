@@ -12,6 +12,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permissible;
 import org.bukkit.util.FileUtil;
 
 import java.io.File;
@@ -143,11 +144,18 @@ public class LotteryPool {
 
     /**
      * 运行处理前置条件
-     * @param player 受处理玩家
+     * @param sender 受处理玩家
      * @param times 处理几次(N连抽)
      * @return 处理是否成功
      */
-    public boolean runRequirement(Player player, int times, List<String> requirement) {
+    public boolean runRequirement(CommandSender sender, int times, List<String> requirement) {
+        Player player;
+        if (sender instanceof Player) {
+            player = (Player) sender;
+        } else {
+            return true;
+        }
+
         if ( !requirement.isEmpty() ) {
             int line = 1;
 
@@ -358,7 +366,7 @@ public class LotteryPool {
         return null;
     }
 
-    public void refreshPlayerData(Player player) {
+    public void refreshPlayerData(CommandSender player) {
         if (playerRefreshRequirement.isEmpty()) return;
         if (runRequirement(player, 1, playerRefreshRequirement))
         for (LotteryData data : lotteryChanceMap.keySet() ) {
@@ -366,7 +374,7 @@ public class LotteryPool {
         }
     }
 
-    public void refreshGlobalData(Player player) {
+    public void refreshGlobalData(CommandSender player) {
         if (globalRefreshRequirement.isEmpty()) return;
         if (runRequirement(player, 1, globalRefreshRequirement)) {
             for (LotteryData data : lotteryChanceMap.keySet()) {

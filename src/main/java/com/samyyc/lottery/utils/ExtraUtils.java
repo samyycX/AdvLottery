@@ -83,7 +83,7 @@ public class ExtraUtils {
      * @return 检查成功/删除成功
      */
     public static boolean checkItemstackInInventory(Player player, ItemStack itemStack, int amount, boolean take) {
-        boolean returnValue = false;
+        boolean returnValue;
         itemStack.setAmount(1);
         Inventory inventory = player.getInventory();
         int inventorySize = inventory.getSize();
@@ -107,7 +107,7 @@ public class ExtraUtils {
         returnValue =  (nowAmount >= amount);
 
 
-        if (!take) return returnValue; else {
+        if (take) {
             int lastTookAmount = 0;
             int nowTookAmount = 0;
             HashMap<Integer, ItemStack> newItemStackMap = new LinkedHashMap<>();
@@ -139,8 +139,8 @@ public class ExtraUtils {
             }
 
             player.updateInventory();
-            return returnValue;
         }
+        return returnValue;
     }
 
     /**
@@ -148,13 +148,25 @@ public class ExtraUtils {
      * @param player 需要帮助的玩家
      */
     public static void printHelpToPlayer(Player player) {
-        player.sendMessage("&a===============&e[AdvLottery]&a===============");
-        player.sendMessage("&b/advlottery help &e#显示此帮助");
-        player.sendMessage("&b/advlottery open <奖池名> &e#打开奖池");
-        player.sendMessage("&b/advlottery pool <奖池名> create &e#创建奖池&c(需要OP权限)");
-        player.sendMessage("&b/advlottery pool");
+        List<String> messageList = new ArrayList<>();
+        messageList.add("&a===============&e[AdvLottery]&a===============");
+        messageList.add("&b/advlottery help &e#显示此帮助");
+        messageList.add("&b/advlottery open <奖池名> &e#打开奖池");
+        messageList.add("&b/advlottery inventory &e#打开抽奖背包");
+        messageList.add("&c以下指令需要OP权限");
+        messageList.add("&b/advlottery pool <奖池名> create &e#创建奖池");
+        messageList.add("&b/advlottery pool <奖池名> addreward <奖品名> &e#向奖池添加奖品");
+        messageList.add("&b/advlottery reward <奖品名> create &e#创建奖品");
+        messageList.add("&b/advlottery reward <奖品名> setdisplayitem &e#设置显示物品");
+        messageList.add("&b/advlottery reward <奖品名> setitem &e#设置物品");
+        messageList.add("&b/advlottery reload &e#重载GUI脚本&c(其余配置会动态读取)");
+        messageList.add("&a==========================================");
+        messageList = TextUtil.convertColor(messageList);
+        messageList.forEach(player::sendMessage);
+
     }
 
+    @Deprecated
     public static HashMap<Integer, ItemStack> insertItem(Map<Integer, ItemStack> map, ItemStack inserted) {
         HashMap<Integer, ItemStack> newMap = new LinkedHashMap<>();
         int i = 0;
@@ -183,17 +195,16 @@ public class ExtraUtils {
         }
     }
 
+    @Deprecated
     public static byte[] delete(int index, byte[] array) {
         byte[] arrNew = new byte[array.length - 1];
-        for (int i = index; i < array.length - 1; i++) {
-            array[i] = array[i + 1];
-        }
+        if (array.length - 1 - index >= 0) System.arraycopy(array, index + 1, array, index, array.length - 1 - index);
         System.arraycopy(array, 0, arrNew, 0, arrNew.length);
         return arrNew;
     }
 
     public static String Insert(int start, int end, String text, String original) {
-        StringBuffer buffer = new StringBuffer(original);
+        StringBuilder buffer = new StringBuilder(original);
         buffer.replace(start, end, text);
         return buffer.toString();
 
@@ -203,8 +214,8 @@ public class ExtraUtils {
     public static String processFormattedVariable(LotteryData data, String text) {
         if (!text.contains("{")) return text;
         String oriori = text;
-        int startPoint = 0;
-        int endPoint = 0;
+        int startPoint;
+        int endPoint;
         startPoint = text.indexOf("{");
         endPoint = text.lastIndexOf("}");
         if (text.replaceFirst("\\{","").contains("{")) {
@@ -306,17 +317,14 @@ public class ExtraUtils {
 
             File folder = new File(instance.getDataFolder(), "GUI页面");
             folder.mkdir();
-            File file = new File(folder, "example.yml");
             instance.saveResource("GUI页面\\example.yml", false);
 
             folder = new File(instance.getDataFolder(), "奖池");
             folder.mkdir();
-            file = new File(folder, "example.yml");
             instance.saveResource("奖池\\example.yml", false);
 
             folder = new File(instance.getDataFolder(), "奖品");
             folder.mkdir();
-            file = new File(folder, "example.yml");
             instance.saveResource("奖品\\example.yml", false);
 
             new File(instance.getDataFolder(), "背包").mkdir();

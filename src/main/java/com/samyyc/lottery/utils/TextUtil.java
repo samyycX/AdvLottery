@@ -18,7 +18,7 @@ public class TextUtil {
 
     public static List<String> convertColor(List<String> textList) {
         List<String> convertedTextList = new LinkedList<>();
-        if ( !Objects.isNull(textList) ) {
+        if ( textList != null ) {
             for (String text : textList) {
                 convertedTextList.add(text.replaceAll("&","§"));
             }
