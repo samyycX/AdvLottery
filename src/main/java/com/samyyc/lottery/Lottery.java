@@ -2,6 +2,7 @@ package com.samyyc.lottery;
 
 import com.samyyc.lottery.apis.APIManager;
 import com.samyyc.lottery.commands.CommandListener;
+import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.listeners.lotteryGUIListener;
@@ -36,6 +37,7 @@ public final class Lottery extends JavaPlugin {
 
         // 注册监听器
         Bukkit.getServer().getPluginManager().registerEvents(new lotteryGUIListener(), this);
+
 
         //Bukkit.getScheduler().runTaskTimer(this, () -> System.out.println(GlobalConfig.resultList), 10L, 0L);
 

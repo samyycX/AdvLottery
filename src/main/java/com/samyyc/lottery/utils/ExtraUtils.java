@@ -5,6 +5,7 @@ import com.samyyc.lottery.objects.LotteryData;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -144,7 +145,7 @@ public class ExtraUtils {
      * 给玩家在聊天框提供命令帮助
      * @param player 需要帮助的玩家
      */
-    public static void printHelpToPlayer(Player player) {
+    public static void printHelpToPlayer(CommandSender player) {
         List<String> messageList = new ArrayList<>();
         messageList.add("&a===============&e[AdvLottery]&a===============");
         messageList.add("&b/advlottery help &e#显示此帮助");

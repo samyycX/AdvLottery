@@ -1,5 +1,6 @@
 package com.samyyc.lottery.listeners;
 
+import com.samyyc.lottery.containers.GuiContainer;
 import com.samyyc.lottery.objects.LotteryGUI;
 import com.samyyc.lottery.objects.LotteryInventory;
 import com.samyyc.lottery.objects.LotteryResult;
@@ -13,7 +14,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,9 +35,9 @@ public class lotteryGUIListener implements Listener {
             return;
         }
 
-        if (e.getView().getTitle().contains(TextUtil.convertColor("&b抽奖 - "))) {
+        if (GuiContainer.getGUI(e.getWhoClicked().getUniqueId()) != null) {
             if (!GlobalConfig.rollingPlayerList.contains((Player) e.getWhoClicked())) {
-                LotteryGUI gui = new LotteryGUI(e.getView().getTitle().replaceAll(TextUtil.convertColor("&b抽奖 - &e"), ""), (Player) e.getWhoClicked());
+                LotteryGUI gui = GuiContainer.getGUI(e.getWhoClicked().getUniqueId());
                 if (e.getView().getItem(e.getSlot()).getType() != Material.AIR) {
                     gui.processClickedSlot(e.getSlot(), (Player) e.getWhoClicked());
                     e.setCancelled(true);
@@ -44,8 +47,8 @@ public class lotteryGUIListener implements Listener {
                 e.setCancelled(true);
                 return;
             }
-            if (!GlobalConfig.resultList.isEmpty()) {
-                Iterator<LotteryResult> it = GlobalConfig.resultList.get(e.getWhoClicked().getName()).iterator();
+            if (GlobalConfig.getResults(e.getWhoClicked().getName()) != null && !GlobalConfig.getResults(e.getWhoClicked().getName()).isEmpty()) {
+                Iterator<LotteryResult> it = GlobalConfig.getResults(e.getWhoClicked().getName()).iterator();
                 while (it.hasNext()) {
                     LotteryResult result = it.next();
                     System.out.println(result.getSlot());
@@ -58,6 +61,8 @@ public class lotteryGUIListener implements Listener {
                         e.setCancelled(true);
                     }
                 }
+            } else {
+                System.out.println(GlobalConfig.resultList);
             }
         } else if (e.getView().getTitle().contains(TextUtil.convertColor("&b抽奖背包 - "))) {
             LotteryInventory lotteryInventory = new LotteryInventory((Player) e.getWhoClicked());
@@ -66,21 +71,24 @@ public class lotteryGUIListener implements Listener {
             matcher.find();
             lotteryInventory.processClickedSlot(e.getRawSlot(), Integer.parseInt(matcher.group(1)));
             e.setCancelled(true);
+        } else {
+            System.out.println(1);
         }
 
     }
 
     @EventHandler
     public void onPlayerCloseInventory(InventoryCloseEvent e) {
-        if (e.getView().getTitle().contains(TextUtil.convertColor("&b抽奖 - "))) {
+        if (GuiContainer.getGUI(e.getPlayer().getUniqueId()) != null && !GlobalConfig.rollingPlayerList.contains((Player) e.getPlayer())) {
             if (!GlobalConfig.resultList.isEmpty()) {
-                Iterator<LotteryResult> it = GlobalConfig.resultList.get(e.getPlayer().getName()).iterator();
-                while (it.hasNext()) {
+                List<LotteryResult> resultList = GlobalConfig.resultList.get(e.getPlayer().getName());
+                for (LotteryResult result : resultList ) {
                     LotteryInventory lotteryInventory = new LotteryInventory((Player)  e.getPlayer());
-                    lotteryInventory.addReward(it.next().getLotteryReward());
-                    it.remove();
+                    lotteryInventory.addReward(result.getLotteryReward());
                 }
+                GlobalConfig.resultList.put(e.getPlayer().getName(), new ArrayList<>());
             }
+            GuiContainer.removeGUI(e.getPlayer().getUniqueId());
         }
     }
 }

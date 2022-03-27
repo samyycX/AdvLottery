@@ -1,5 +1,6 @@
 package com.samyyc.lottery.commands;
 
+import com.samyyc.lottery.containers.GuiContainer;
 import com.samyyc.lottery.objects.LotteryInventory;
 import com.samyyc.lottery.objects.LotteryPool;
 import com.samyyc.lottery.objects.LotteryReward;
@@ -23,6 +24,11 @@ public class CommandListener implements CommandExecutor {
         Player player = (Player) sender;
 
         LotteryPool lotteryPool;
+
+        if (args.length == 0) {
+            ExtraUtils.printHelpToPlayer(sender);
+            return true;
+        }
 
         switch ( args[0].toLowerCase() ) {
             case "help":
@@ -100,6 +106,9 @@ public class CommandListener implements CommandExecutor {
             case "reload":
                 if (sender.isOp()) {
                     GlobalConfig.GUIScriptList.clear();
+                    GuiContainer.destroy();
+                    PoolContainer.destroy();
+                    RewardContainer.destroy();
                 } else {
                     sender.sendMessage(WarningUtil.PERMISSION_ERROR.getMessage());
                 }

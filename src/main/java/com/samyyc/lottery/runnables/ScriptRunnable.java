@@ -1,9 +1,7 @@
 package com.samyyc.lottery.runnables;
 
-import com.samyyc.lottery.objects.LotteryData;
-import com.samyyc.lottery.objects.LotteryPool;
-import com.samyyc.lottery.objects.LotteryResult;
-import com.samyyc.lottery.objects.LotteryReward;
+import com.samyyc.lottery.containers.GuiContainer;
+import com.samyyc.lottery.objects.*;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.LogUtils;
 import org.bukkit.Instrument;
@@ -46,34 +44,43 @@ public class ScriptRunnable implements Runnable {
             if (script.startsWith("出奖")) {
                 String[] split = script.split(" ");
                 int targetSlot = Integer.parseInt(split[1]);
-                LotteryReward reward = pool.getRewardByItemstack(inventory.getItem(targetSlot));
+                LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
+                LotteryReward reward = pool.getRewardByItemstack(gui.inventory().getItem(targetSlot));
                 LotteryResult result = new LotteryResult(player, targetSlot, reward);
-                if (GlobalConfig.resultList.get(player.getName()) == null) {
-                    List<LotteryResult> list = new ArrayList<>();
-                    list.add(result);
-                    GlobalConfig.resultList.put(player.getName(), list);
-                } else {
-                    List<LotteryResult> list = GlobalConfig.resultList.get(player.getName());
-                    list.add(result);
-                    GlobalConfig.resultList.put(player.getName(), list);
-                }
+                GlobalConfig.putResult(player.getName(), result);
+                System.out.println("调用");
+                    //List<LotteryResult> list = GlobalConfig.resultList.get(player.getName());
+                    //list.add(result);
                 LogUtils.addLog(player.getName()+" 在 "+pool.getName()+" 抽到了 "+result.getLotteryReward().getRewardName());
             } else if (script.startsWith("轮换物品")) {
                 String[] split = script.split(" ");
                 int originSlot;
-                int targetSlot;
-                originSlot = Integer.parseInt(split[1]);
-                targetSlot = Integer.parseInt(split[2]);
+                int targetSlot; try {
+                    originSlot = Integer.parseInt(split[1]);
+                    targetSlot = Integer.parseInt(split[2]);
+                } catch (NumberFormatException ignored) {
+                    return;
+                }
                 //inventory.setItem(targetSlot, inventory.getItem(originSlot));
-                player.getOpenInventory().getTopInventory().setItem(targetSlot, inventory.getItem(originSlot));
+                LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
+                gui.inventory().setItem(targetSlot, gui.inventory().getItem(originSlot));
+                gui.showInventory(player);
+                //player.getOpenInventory().getTopInventory().setItem(targetSlot, inventory.getItem(originSlot));
             } else if (script.startsWith("替换物品")) {
                 String[] split = script.split(" ");
                 int originSlot;
-                originSlot = Integer.parseInt(split[1]);
+                try {
+                    originSlot = Integer.parseInt(split[1]);
+                } catch (NumberFormatException ignored) {
+                    return;
+                }
                 ItemStack item = itemMap.get(split[2]);
                 if (item != null) {
                     //inventory.setItem(originSlot, item);
-                    player.getOpenInventory().getTopInventory().setItem(originSlot, item);
+                    LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
+                    gui.inventory().setItem(originSlot, item);
+                    gui.showInventory(player);
+                    //player.getOpenInventory().getTopInventory().setItem(originSlot, item);
                 }
             } else if (script.startsWith("播放音符")) {
                 String[] split = script.split(" ");
@@ -83,8 +90,10 @@ public class ScriptRunnable implements Runnable {
             } else if (script.startsWith("随机奖品")) {
                 LotteryData data = pool.roll();
                 int slot = Integer.parseInt(script.split(" ")[1]);
-                inventory.setItem(slot, data.getDisplayItemStack());
-                player.openInventory(inventory);
+                LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
+                gui.inventory().setItem(slot, data.getDisplayItemStack());
+                gui.showInventory(player);
+                //player.openInventory(inventory);
             } else if (script.startsWith("消耗前置条件")) {
                 int times = Integer.parseInt(script.split(" ")[1]);
                 pool.runRequirement(player, times, pool.getDefaultRequirement());

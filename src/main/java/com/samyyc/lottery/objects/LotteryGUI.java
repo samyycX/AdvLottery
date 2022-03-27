@@ -2,10 +2,12 @@ package com.samyyc.lottery.objects;
 
 import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.containers.GuiContainer;
 import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.runnables.ScriptRunnable;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
+import com.samyyc.lottery.utils.WarningUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -54,6 +56,7 @@ public class LotteryGUI {
 
     public void showInventory(Player player) {
         player.openInventory(inventory);
+        GuiContainer.addGUI(player.getUniqueId(), this);
     }
 
     public void getInventoryFromYml() {
@@ -103,6 +106,7 @@ public class LotteryGUI {
                 FileUtil.copy(template, file);
             } catch (IOException e) {
                 e.printStackTrace();
+                Bukkit.getLogger().info(WarningUtil.FILE_ERROR.getMessage());
             }
         }
         config = YamlConfiguration.loadConfiguration(file);
@@ -245,6 +249,14 @@ public class LotteryGUI {
         Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), () -> GlobalConfig.rollingPlayerList.remove(player), delay+5L);
     }
 
+    public Inventory inventory() {
+        return inventory;
+    }
+
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
+    }
+
     public void processClickedSlot(int slot, Player player ) {
         String itemName = config.getString("GUI."+slot);
         if (itemName == null) return;
@@ -266,6 +278,7 @@ public class LotteryGUI {
                 case "转到gui":
                     String GUIName = task.split(" ")[1];
                     LotteryGUI gui = new LotteryGUI(GUIName, player);
+                    gui.showInventory(player);
             }
 
 

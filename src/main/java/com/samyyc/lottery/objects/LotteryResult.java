@@ -4,9 +4,9 @@ import org.bukkit.entity.Player;
 
 public class LotteryResult {
 
-    private Player player;
-    private int slot;
-    private LotteryReward reward;
+    private final Player player;
+    private final int slot;
+    private final LotteryReward reward;
 
     public LotteryResult(Player player, int slot, LotteryReward reward) {
         this.player = player;
@@ -26,12 +26,4 @@ public class LotteryResult {
         return player;
     }
 
-    @Override
-    public String toString() {
-        return "LotteryResult{" +
-                "player=" + player +
-                ", slot=" + slot +
-                ", reward=" + reward +
-                '}';
-    }
 }

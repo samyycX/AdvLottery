@@ -89,7 +89,6 @@ public class LotteryPool {
      * @param player 给谁打开GUI
      */
     public void showLotteryPool(Player player) {
-        int i = 0;
         if (isEnabled) {
             invalidFilter(player);
 
