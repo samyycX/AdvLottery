@@ -1,6 +1,7 @@
 package com.samyyc.lottery.commands;
 
 import com.samyyc.lottery.containers.GuiContainer;
+import com.samyyc.lottery.containers.InventoryContainer;
 import com.samyyc.lottery.objects.LotteryInventory;
 import com.samyyc.lottery.objects.LotteryPool;
 import com.samyyc.lottery.objects.LotteryReward;
@@ -9,7 +10,7 @@ import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
-import com.samyyc.lottery.utils.WarningUtil;
+import com.samyyc.lottery.utils.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,12 +34,13 @@ public class CommandListener implements CommandExecutor {
         switch ( args[0].toLowerCase() ) {
             case "help":
                 ExtraUtils.printHelpToPlayer(player);
+                break;
             case "open":
                 if (LotteryPool.checkExist(args[1])) {
                     lotteryPool = PoolContainer.getPool(args[1]);
                     lotteryPool.showLotteryPool(player);
                 } else {
-                    sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c未知的奖池: "+args[1]));
+                    sender.sendMessage(Message.ERROR_UNKNOWN_POOL.getMessage().replace("{poolname}",""));
                 }
                 break;
             case "pool":
@@ -51,22 +53,22 @@ public class CommandListener implements CommandExecutor {
                         switch (args[2].toLowerCase()) {
                             case "create":
                                 PoolContainer.addPool(args[1], true);
-                                sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&a奖池创建成功!"));
+                                sender.sendMessage(Message.SUCCESS_CREATE_POOL.getMessage());
                                 break;
                             case "addreward":
                                 lotteryPool = PoolContainer.getPool(args[1]);
                                 String rewardName = args[3];
                                 lotteryPool.initializeReward(rewardName);
-                                sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&a奖品添加成功!&c(如果奖品已在配置中存在，将不会做出任何改变)"));
+                                sender.sendMessage(Message.SUCCESS_ADD_ITEM.getMessage());
                                 break;
                             default:
-                                sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c未知的参数: "+args[2]+", 请输入/advlottery help 获取帮助"));
+                                sender.sendMessage(Message.ERROR_UNKNOWN_ARGUMENT.getMessage().replace("{arg}",args[2]));
                         }
                     } else {
-                        sender.sendMessage(WarningUtil.COMMAND_ERROR.getMessage());
+                        sender.sendMessage(Message.ERROR_COMMAND.getMessage());
                     }
                 } else {
-                    sender.sendMessage(WarningUtil.PERMISSION_ERROR.getMessage());
+                    sender.sendMessage(Message.ERROR_PERMISSION.getMessage());
                 }
                 break;
             case "reward":
@@ -80,37 +82,38 @@ public class CommandListener implements CommandExecutor {
                         switch ( args[2].toLowerCase()) {
                             case "create":
                                 reward = RewardContainer.getReward(rewardName);
+                                player.sendMessage(Message.SUCCESS_CREATE_REWARD.getMessage());
                                 break;
                             case "setdisplayitem":
                                 reward = RewardContainer.getReward(rewardName);
                                 reward.setDisplayItem(player.getInventory().getItemInMainHand());
+                                player.sendMessage(Message.SUCCESS_SET_ITEM.getMessage());
                                 break;
                             case "setitem":
                                 reward = RewardContainer.getReward(rewardName);
                                 reward.setItem(args[3], player.getInventory().getItemInMainHand());
+                                player.sendMessage(Message.SUCCESS_SET_ITEM.getMessage());
                                 break;
                         }
                     } else {
-                        sender.sendMessage(WarningUtil.COMMAND_ERROR.getMessage());
+                        sender.sendMessage(Message.ERROR_COMMAND.getMessage());
                         ExtraUtils.printHelpToPlayer(player);
                     }
                 } else {
-                    sender.sendMessage(WarningUtil.PERMISSION_ERROR.getMessage());
+                    sender.sendMessage(Message.ERROR_PERMISSION.getMessage());
                 }
                 break;
             case "inventory":
                 Bukkit.getLogger().info(player.getName());
-                LotteryInventory lotteryInventory = new LotteryInventory(player);
+                LotteryInventory lotteryInventory = InventoryContainer.getInventory(player.getUniqueId());
                 player.openInventory(lotteryInventory.getInventory(0));
                 break;
             case "reload":
                 if (sender.isOp()) {
-                    GlobalConfig.GUIScriptList.clear();
-                    GuiContainer.destroy();
-                    PoolContainer.destroy();
-                    RewardContainer.destroy();
+                    ExtraUtils.destroy();
+                    sender.sendMessage(Message.SUCCESS_RELOAD.getMessage());
                 } else {
-                    sender.sendMessage(WarningUtil.PERMISSION_ERROR.getMessage());
+                    sender.sendMessage(Message.ERROR_PERMISSION.getMessage());
                 }
                 break;
         }

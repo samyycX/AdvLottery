@@ -1,7 +1,10 @@
 name: advLottery
 version: '${project.version}'
 main: com.samyyc.lottery.Lottery
+author: [ samyyc ]
 commands:
   advlottery:
+    usage: "/advlottery help"
+    description: "command for AdvLottery Plugin."
 
 softdepend: [Vault, PlayerPoints, PlaceholderAPI]

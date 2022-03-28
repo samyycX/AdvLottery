@@ -1,8 +1,11 @@
 package com.samyyc.lottery;
 
 import com.samyyc.lottery.apis.APIManager;
+import com.samyyc.lottery.bstats.Metrics;
 import com.samyyc.lottery.commands.CommandListener;
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.containers.GuiContainer;
+import com.samyyc.lottery.containers.InventoryContainer;
 import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.listeners.lotteryGUIListener;
@@ -11,7 +14,13 @@ import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.LogUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 public final class Lottery extends JavaPlugin {
 
@@ -38,15 +47,19 @@ public final class Lottery extends JavaPlugin {
         // 注册监听器
         Bukkit.getServer().getPluginManager().registerEvents(new lotteryGUIListener(), this);
 
+        // 接入bStats
+        int pluginId = 14784;
+        Metrics metrics = new Metrics(this, pluginId);
 
         //Bukkit.getScheduler().runTaskTimer(this, () -> System.out.println(GlobalConfig.resultList), 10L, 0L);
+        // TODO: 把GlobalConfig.floorList里的东西实装
+
 
     }
 
     @Override
     public void onDisable() {
-        PoolContainer.destroy();
-        RewardContainer.destroy();
+        ExtraUtils.destroy();
     }
 
     public static APIManager getAPI() {

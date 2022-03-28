@@ -7,7 +7,7 @@ import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.runnables.ScriptRunnable;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
-import com.samyyc.lottery.utils.WarningUtil;
+import com.samyyc.lottery.utils.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -106,7 +106,7 @@ public class LotteryGUI {
                 FileUtil.copy(template, file);
             } catch (IOException e) {
                 e.printStackTrace();
-                Bukkit.getLogger().info(WarningUtil.FILE_ERROR.getMessage());
+                Bukkit.getLogger().info(Message.ERROR_FILE.getMessage());
             }
         }
         config = YamlConfiguration.loadConfiguration(file);
@@ -230,23 +230,30 @@ public class LotteryGUI {
         for (String script : GlobalConfig.GUIScriptList.get(GUIName+"."+scriptName)) {
             if (delay == 0) {
                 if (!script.startsWith("延时")) {
-                    ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap);
-                    runnable.run();
+                    if (GlobalConfig.TEMP.get(player.getUniqueId()) == null) {
+                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap);
+                        runnable.run();
+                    }
                 } else {
                     int delay2 = Integer.parseInt(script.split(" ")[1]);
                     delay += delay2;
                 }
             } else {
                 if (!script.startsWith("延时")) {
-                    ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap);
+                    if (GlobalConfig.TEMP.get(player.getUniqueId()) == null) {
+                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap);
                     Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), runnable, delay);
+                    }
                 } else {
                     int delay2 = Integer.parseInt(script.split(" ")[1]);
                     delay += delay2;
                 }
             }
         }
-        Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), () -> GlobalConfig.rollingPlayerList.remove(player), delay+5L);
+        Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), () -> {
+            GlobalConfig.rollingPlayerList.remove(player);
+            GlobalConfig.TEMP.put(player.getUniqueId(), null);
+        }, delay+5L);
     }
 
     public Inventory inventory() {
@@ -274,6 +281,16 @@ public class LotteryGUI {
                     break;
                 case "刷新全服奖池数据":
                     pool.refreshGlobalData(player);
+                    break;
+                case "消耗前置条件":
+                    int times = Integer.parseInt(task.split(" ")[1]);
+                    pool.runRequirement(player, times, pool.getDefaultRequirement());
+                    break;
+                case "直接抽奖":
+                    int time = Integer.parseInt(task.split(" ")[1]);
+                    for (int i = 0; i < time; i++) {
+                        //LotteryInventory
+                    }
                     break;
                 case "转到gui":
                     String GUIName = task.split(" ")[1];

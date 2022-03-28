@@ -30,12 +30,11 @@ public class AdvLotteryExpansion extends PlaceholderExpansion {
     @Override
     public String onPlaceholderRequest(Player player, String identifier) {
         // 保底次数
-        // %advlottery_玩家已出次数_奖池A_奖品A%
+        // %advlottery_奖池A_奖品A_玩家已出次数%
         // %advlottery_玩家已保底次数_奖池A_奖品A%
         // %advlottery_玩家已出保底次数_奖池A_奖品A%
         String[] args = identifier.split("_",3);
-        String poolname = args[1];
-        String rewardName = args[2];
+        String poolname = args[0];
         LotteryPool lotteryPool = PoolContainer.getPool(poolname);
 
         return lotteryPool.getRewardData(player, identifier);

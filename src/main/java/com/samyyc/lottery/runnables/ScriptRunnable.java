@@ -3,15 +3,17 @@ package com.samyyc.lottery.runnables;
 import com.samyyc.lottery.containers.GuiContainer;
 import com.samyyc.lottery.objects.*;
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.utils.FloorUtil;
 import com.samyyc.lottery.utils.LogUtils;
+import com.samyyc.lottery.utils.Message;
+import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class ScriptRunnable implements Runnable {
@@ -45,13 +47,24 @@ public class ScriptRunnable implements Runnable {
                 String[] split = script.split(" ");
                 int targetSlot = Integer.parseInt(split[1]);
                 LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
-                LotteryReward reward = pool.getRewardByItemstack(gui.inventory().getItem(targetSlot));
+                LotteryReward reward;
+                LotteryData data;
+                if (FloorUtil.hasFloorReward(player.getUniqueId())) {
+                    reward = FloorUtil.getFloorReward(player.getUniqueId());
+                    gui.inventory().setItem(targetSlot, reward.getDisplayItem());
+                } else {
+                    data = pool.getDataByItemstack(gui.inventory().getItem(targetSlot));
+                    reward = data.getReward();
+                    //data.preProcess2();
+                }
                 LotteryResult result = new LotteryResult(player, targetSlot, reward);
-                GlobalConfig.putResult(player.getName(), result);
-                System.out.println("调用");
-                    //List<LotteryResult> list = GlobalConfig.resultList.get(player.getName());
-                    //list.add(result);
-                LogUtils.addLog(player.getName()+" 在 "+pool.getName()+" 抽到了 "+result.getLotteryReward().getRewardName());
+                GlobalConfig.putResult(player.getUniqueId(), result);
+                // TODO: 优化保底
+                LogUtils.addLog(Message.LOG_ROLL_SUCCESS.getMessage()
+                        .replace("{playername}",player.getName())
+                        .replace("{poolname}", pool.getName())
+                        .replace("{rewardname}",result.getLotteryReward().getRewardName()));
+
             } else if (script.startsWith("轮换物品")) {
                 String[] split = script.split(" ");
                 int originSlot;
@@ -84,8 +97,20 @@ public class ScriptRunnable implements Runnable {
                 }
             } else if (script.startsWith("播放音符")) {
                 String[] split = script.split(" ");
-                Instrument instrument = Instrument.valueOf(split[1]);
-                Note.Tone tone = Note.Tone.valueOf(split[2]);
+                Instrument instrument;
+                Note.Tone tone;
+                try {
+                    instrument = Instrument.valueOf(split[1]);
+                } catch (IllegalArgumentException e) {
+                    Bukkit.getLogger().info(Message.ERROR_UNKNOWN_INSTRUMENT.getMessage().replace("{insname}",split[1]));
+                    return;
+                }
+                try {
+                    tone = Note.Tone.valueOf(split[2]);
+                } catch (IllegalArgumentException e) {
+                    Bukkit.getLogger().info(Message.ERROR_UNKNOWN_TONE.getMessage().replace("{tonename}",split[2]));
+                    return;
+                }
                 player.playNote(player.getLocation(), instrument, Note.natural(1, tone));
             } else if (script.startsWith("随机奖品")) {
                 LotteryData data = pool.roll();
@@ -96,7 +121,10 @@ public class ScriptRunnable implements Runnable {
                 //player.openInventory(inventory);
             } else if (script.startsWith("消耗前置条件")) {
                 int times = Integer.parseInt(script.split(" ")[1]);
-                pool.runRequirement(player, times, pool.getDefaultRequirement());
+                if ( !pool.runRequirement(player, times, pool.getDefaultRequirement())) {
+                    GlobalConfig.TEMP.put(player.getUniqueId(), "0");
+                    player.sendMessage(Message.ERROR_REQUIREMENT.getMessage());
+                }
             }
         }
     }

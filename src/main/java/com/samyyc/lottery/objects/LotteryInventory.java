@@ -3,7 +3,7 @@ package com.samyyc.lottery.objects;
 import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.utils.TextUtil;
-import com.samyyc.lottery.utils.WarningUtil;
+import com.samyyc.lottery.utils.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,7 +38,7 @@ public class LotteryInventory {
                     file.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Bukkit.getLogger().info(WarningUtil.FILE_ERROR.getMessage());
+                    Bukkit.getLogger().info(Message.ERROR_FILE.getMessage());
                 }
             }
             config = YamlConfiguration.loadConfiguration(file);
@@ -117,7 +117,7 @@ public class LotteryInventory {
                 config.save(file);
             } catch (IOException e) {
                 e.printStackTrace();
-                Bukkit.getLogger().info(WarningUtil.FILE_ERROR.getMessage());
+                Bukkit.getLogger().info(Message.ERROR_FILE.getMessage());
             }
             initInventory();
         }
@@ -129,7 +129,7 @@ public class LotteryInventory {
             config.save(file);
         } catch (IOException e) {
             e.printStackTrace();
-            Bukkit.getLogger().info(WarningUtil.FILE_ERROR.getMessage());
+            Bukkit.getLogger().info(Message.ERROR_FILE.getMessage());
         }
         player.openInventory(getInventory(page));
         initInventory();

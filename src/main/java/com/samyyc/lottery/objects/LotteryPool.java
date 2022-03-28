@@ -4,6 +4,7 @@ import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
+import com.samyyc.lottery.utils.Message;
 import com.samyyc.lottery.utils.TextUtil;
 import com.sun.istack.internal.Nullable;
 import org.bukkit.Bukkit;
@@ -67,7 +68,7 @@ public class LotteryPool {
             while (iterator.hasNext()) {
                 LotteryData data = iterator.next();
                 data.initializePlayerData(player);
-                if (data.getDisplayItemStack().getType() == Material.BARRIER && data.getDisplayItemStack().getItemMeta().getDisplayName().contains(TextUtil.convertColor("&c&l不可用"))) {
+                if (!data.isEnabled) {
                     iterator.remove();
                 }
             }
@@ -103,7 +104,8 @@ public class LotteryPool {
     // %奖池A_aa%
     // %奖池A_奖品A_全服已出此奖品次数%
     public String getRewardData(Player player, String args) {
-        String[] split = args.split(" ");
+        System.out.println(args);
+        String[] split = args.split("_");
         if (split.length == 2) {
             String poolName = split[0];
             String attribute = split[1];
@@ -120,7 +122,7 @@ public class LotteryPool {
             String attribute = split[2];
             for (LotteryData data : lotteryChanceMap.keySet() ) {
                 if (data.getReward().getRewardName().equals(rewardName)) {
-                    return String.valueOf(data.configMap.get(attribute));
+                    return data.getAttribute(attribute, player);
                 }
             }
         }
@@ -157,25 +159,25 @@ public class LotteryPool {
                         ItemStack itemStack = ExtraUtils.generateItemstackFromYml(itemstackSection);
                         boolean isConsumeItemSuccess = ExtraUtils.checkItemstackInInventory(player, itemStack, itemAmount * times, false);
                         if (!isConsumeItemSuccess) {
-                            player.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c您没有足够的物品!"));
+                            player.sendMessage(Message.WARNING_NOT_ENOUGH_ITEM.getMessage());
                             return false;
                         }
                         break;
                     case "vault减钱":
                         if (!APIUtils.hasVaultEconomy(player, Integer.parseInt(arg) * times)) {
-                            player.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c您没有足够的钱!"));
+                            player.sendMessage(Message.WARNING_NOT_ENOUGH_VAULT_MONEY.getMessage());
                             return false;
                         }
                         break;
                     case "playerpoints减点数":
                         if (!APIUtils.hasPlayerPoints(player, Integer.parseInt(arg) * times)) {
-                            player.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c您没有足够的点券!"));
+                            player.sendMessage(Message.WARNING_NOT_ENOUGH_PLAYERPOINTS_CREDIT.getMessage());
                             return false;
                         }
                         break;
                     case "拥有权限":
                         if (!player.hasPermission(arg)) {
-                            player.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c您没有权限&e"+arg+"&c以抽奖!"));
+                            player.sendMessage(Message.WARNING_NO_PERMISSION.getMessage().replace("{permission}",arg));
                             return false;
                         }
                     default:
@@ -271,7 +273,7 @@ public class LotteryPool {
                     e.printStackTrace();
                 }
             } else {
-                if (sender != null) sender.sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c奖池不存在!"));
+                if (sender != null) sender.sendMessage(Message.ERROR_UNKNOWN_POOL.getMessage().replace("{poolname}",name));
                 return;
             }
         }
@@ -337,7 +339,7 @@ public class LotteryPool {
         return null;
     }
 
-    public LotteryReward getRewardByItemstack(ItemStack itemStack) {
+    public LotteryData getDataByItemstack(ItemStack itemStack) {
         for (LotteryData data : lotteryChanceMap.keySet() ) {
             ItemStack dataItemstack = data.getDisplayItemStack();
             if (
@@ -345,7 +347,7 @@ public class LotteryPool {
                     && dataItemstack.getAmount() == itemStack.getAmount()
                     && dataItemstack.getItemMeta().getDisplayName().equals(itemStack.getItemMeta().getDisplayName())
             ) {
-                return data.getReward();
+                return data;
             }
         }
         return null;

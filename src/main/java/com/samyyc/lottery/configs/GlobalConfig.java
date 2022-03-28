@@ -16,31 +16,40 @@ public class GlobalConfig {
 
     public static List<Player> rollingPlayerList = new ArrayList<>();
 
-    public static HashMap<String, List<LotteryResult>> resultList = new HashMap<>();
+    public static HashMap<UUID, List<LotteryResult>> resultList = new HashMap<>();
 
-    public static HashMap<String, LotteryReward> floorList = new HashMap<>();
+    public static HashMap<UUID, List<LotteryReward>> floorList = new HashMap<>();
 
     public static HashMap<String, List<String>> GUIScriptList = new HashMap<>();
+
+    public static Map<UUID, String> TEMP = new HashMap<>();
 
 
     // api
     public static Map<String, CustomLotteryTask> taskMap = new HashMap<>();
 
-    public static void putResult(String playername, LotteryResult result) {
+    public static void putResult(UUID uuid, LotteryResult result) {
         System.out.println(result.getLotteryReward().getRewardName()); //正常
-        if (resultList.get(playername) != null) {
-            resultList.get(playername).add(result);
+        if (resultList.get(uuid) != null) {
+            resultList.get(uuid).add(result);
         } else {
             List<LotteryResult> results = new ArrayList<>();
             results.add(result);
             System.out.println(results); //正常
-            GlobalConfig.resultList.put(playername, results);
+            GlobalConfig.resultList.put(uuid, results);
             System.out.println(GlobalConfig.resultList);
         }
     }
 
-    public static List<LotteryResult> getResults(String playerName) {
-        return resultList.get(playerName);
+    public static List<LotteryResult> getResults(UUID playerUUID) {
+        return resultList.get(playerUUID);
+    }
+
+    public static void destroy() {
+        rollingPlayerList.clear();
+        resultList.clear();
+        GUIScriptList.clear();
+        taskMap.clear();
     }
 
 }

@@ -1,6 +1,11 @@
 package com.samyyc.lottery.utils;
 
 import com.samyyc.lottery.Lottery;
+import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.containers.GuiContainer;
+import com.samyyc.lottery.containers.InventoryContainer;
+import com.samyyc.lottery.containers.PoolContainer;
+import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.objects.LotteryData;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -32,10 +37,11 @@ public class ExtraUtils {
         if (StringUtils.isNumeric(materialID)) {
             material = Material.getMaterial(Integer.parseInt(materialID));
         } else {
+            materialID = materialID.toUpperCase();
             material = Material.getMaterial(materialID);
         }
         if (Objects.isNull(material)) {
-            Bukkit.getLogger().info(WarningUtil.MATERIAL_ERROR.getMessage()+" "+materialID);
+            Bukkit.getLogger().info(Message.ERROR_MATERIAL.getMessage()+" "+materialID);
             return Material.BARRIER;
         }
         return material;
@@ -156,8 +162,8 @@ public class ExtraUtils {
         messageList.add("&b/advlottery pool <奖池名> addreward <奖品名> &e#向奖池添加奖品");
         messageList.add("&b/advlottery reward <奖品名> create &e#创建奖品");
         messageList.add("&b/advlottery reward <奖品名> setdisplayitem &e#设置显示物品");
-        messageList.add("&b/advlottery reward <奖品名> setitem &e#设置物品");
-        messageList.add("&b/advlottery reload &e#重载GUI脚本&c(其余配置会动态读取)");
+        messageList.add("&b/advlottery reward <奖品名> setitem <物品名> &e#设置物品");
+        messageList.add("&b/advlottery reload &e#重载所有配置");
         messageList.add("&a==========================================");
         messageList = TextUtil.convertColor(messageList);
         messageList.forEach(player::sendMessage);
@@ -185,9 +191,9 @@ public class ExtraUtils {
         return newMap;
     }
 
-    public static String replaceAll(String text, String regex, String replacement) {
+    public static String replaceAll(String text, String regex, Object replacement) {
         if (replacement != null) {
-            return text.replaceAll(regex, replacement);
+            return text.replaceAll(regex, String.valueOf(replacement));
         } else {
             return text.replaceAll(regex, "");
         }
@@ -331,6 +337,14 @@ public class ExtraUtils {
             instance.saveDefaultConfig();
 
         }
+    }
+
+    public static void destroy() {
+        PoolContainer.destroy();
+        RewardContainer.destroy();
+        GuiContainer.destroy();
+        InventoryContainer.destroy();
+        GlobalConfig.destroy();
     }
 }
 

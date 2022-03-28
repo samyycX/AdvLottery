@@ -4,6 +4,7 @@ import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.utils.ExtraUtils;
+import com.samyyc.lottery.utils.FloorUtil;
 import com.samyyc.lottery.utils.TextUtil;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -26,6 +27,7 @@ public class LotteryData {
     YamlConfiguration dataConfig;
     File file;
     Map<String, Object> configMap = new LinkedHashMap<>();
+    // 全服已出此奖品次数
     int totaltime = 0;
     Map<String, Map<String, Object>> playerDataMap = new LinkedHashMap<>();
     List<String> customLores = new LinkedList<>();
@@ -34,7 +36,9 @@ public class LotteryData {
 
     Player player;
 
+    // 全服已抽此奖池次数
     int poolTotalTime = 0;
+    // 玩家已抽此奖池次数
     Map<String, Integer> poolPlayerTotalTime = new HashMap<>();
     List<String> requirementList = new ArrayList<>();
     int serverRequirementLength = 0;
@@ -90,29 +94,32 @@ public class LotteryData {
         dataConfig = YamlConfiguration.loadConfiguration(file);
         poolTotalTime = dataConfig.getInt("全服已抽此奖池次数");
         ConfigurationSection playerTotalSection = dataConfig.getConfigurationSection("玩家已抽此奖池次数");
-        for (String key : playerTotalSection.getKeys(false)) {
-            poolPlayerTotalTime.put(key, playerTotalSection.getInt(key));
+        if (playerTotalSection != null) {
+            for (String key : playerTotalSection.getKeys(false)) {
+                poolPlayerTotalTime.put(key, playerTotalSection.getInt(key));
+            }
         }
         ConfigurationSection dataSection = dataConfig.getConfigurationSection("奖品数据."+rewardName);
-
-        for ( String key : dataSection.getKeys(false) ) {
-            if ("全服已出此奖品次数".equals(key)) {
-                totaltime = configSection.getInt(key);
-            } else if ("玩家数据".equals(key)) {
-                ConfigurationSection playerDataSection = dataSection.getConfigurationSection("玩家数据");
-                Map<String, Object> map = new HashMap<>();
-                for ( String playerName : playerDataSection.getKeys(false)) {
-                    ConfigurationSection playerSection = playerDataSection.getConfigurationSection(playerName);
-                    for ( String attribute : playerSection.getKeys(false) ) {
-                        switch (attribute) {
-                            case "玩家已出次数":
-                            case "玩家已保底次数":
-                            case "玩家已出保底次数":
-                                map.put(attribute, playerSection.getInt(attribute));
-                                break;
+        if (dataSection != null) {
+            for (String key : dataSection.getKeys(false)) {
+                if ("全服已出此奖品次数".equals(key)) {
+                    totaltime = configSection.getInt(key);
+                } else if ("玩家数据".equals(key)) {
+                    ConfigurationSection playerDataSection = dataSection.getConfigurationSection("玩家数据");
+                    Map<String, Object> map = new HashMap<>();
+                    for (String playerName : playerDataSection.getKeys(false)) {
+                        ConfigurationSection playerSection = playerDataSection.getConfigurationSection(playerName);
+                        for (String attribute : playerSection.getKeys(false)) {
+                            switch (attribute) {
+                                case "玩家已出次数":
+                                case "玩家已保底次数":
+                                case "玩家已出保底次数":
+                                    map.put(attribute, playerSection.getInt(attribute));
+                                    break;
+                            }
                         }
+                        playerDataMap.put(playerName, map);
                     }
-                    playerDataMap.put(playerName, map);
                 }
             }
         }
@@ -121,6 +128,12 @@ public class LotteryData {
     }
 
     private void initializePlayerData() {
+        if (dataConfig.getString("全服已抽此奖池次数") == null) {
+            dataConfig.set("全服已抽此奖池次数", 0);
+        }
+        if (dataConfig.getConfigurationSection("玩家已抽此奖池次数") == null){
+            dataConfig.createSection("玩家已抽此奖池次数");
+        }
         if (player != null) {
             ConfigurationSection section = dataConfig.getConfigurationSection("奖品数据."+reward.getRewardName()+".玩家数据." + player.getName());
             if (section == null) {
@@ -225,17 +238,23 @@ public class LotteryData {
     }
 
     private String replace2(String expression, LotteryData data) {
-        expression = ExtraUtils.replaceAll(expression, "真实概率", String.valueOf(data.configMap.get("真实概率")));
-        expression = ExtraUtils.replaceAll(expression, "显示概率", String.valueOf(data.configMap.get("显示概率")));
-        expression = ExtraUtils.replaceAll(expression, "全服限制数量", String.valueOf(data.configMap.get("全服限制数量")));
-        expression = ExtraUtils.replaceAll(expression, "玩家限制数量", String.valueOf(data.configMap.get("玩家限制数量")));
-        expression = ExtraUtils.replaceAll(expression, "玩家保底次数", String.valueOf(data.playerDataMap.get(data.player.getName()).get("玩家已保底次数")));
-        expression = ExtraUtils.replaceAll(expression, "玩家已抽奖池次数", String.valueOf(data.poolPlayerTotalTime.get(data.player.getName())));
-        expression = ExtraUtils.replaceAll(expression, "玩家已出奖品次数", String.valueOf(data.playerDataMap.get(data.player.getName()).get("玩家已出次数")));
+        expression = ExtraUtils.replaceAll(expression, "真实概率",data.configMap.get("真实概率"));
+        expression = ExtraUtils.replaceAll(expression, "显示概率",data.configMap.get("显示概率"));
+        expression = ExtraUtils.replaceAll(expression, "全服限制数量",data.configMap.get("全服限制数量"));
+        expression = ExtraUtils.replaceAll(expression, "玩家限制数量",data.configMap.get("玩家限制数量"));
+        if (expression.contains("玩家保底次数")) {
+            expression = ExtraUtils.replaceAll(expression, "玩家保底次数", data.playerDataMap.get(data.player.getName()).get("玩家已保底次数"));
+        }
+        if (expression.contains("玩家已抽奖池次数")) {
+            expression = ExtraUtils.replaceAll(expression, "玩家已抽奖池次数", data.poolPlayerTotalTime.get(data.player.getName()));
+        }
+        if (expression.contains("玩家已出奖品次数")) {
+            expression = ExtraUtils.replaceAll(expression, "玩家已出奖品次数", data.playerDataMap.get(data.player.getName()).get("玩家已出次数"));
+        }
         if (expression.contains("全服限制开启条件")) {
             if (expression.contains("全服已抽物品次数")) {
+                String[] spilted = expression.split("-");
                 if (expression.contains("奖品名")) {
-                    String[] spilted = expression.split("-");
                     if (spilted.length == 3) {
                         expression = ExtraUtils.replaceAll(expression, "全服限制开启条件-全服已抽物品次数-奖品名", data.requirementList.get(0).split(" ")[1]);
                     } else if (spilted.length == 4) {
@@ -243,7 +262,6 @@ public class LotteryData {
                         expression = ExtraUtils.replaceAll(expression, "全服限制开启条件-全服已抽物品次数-奖品名-\\d+", data.requirementList.get(index2).split(" ")[1]);
                     }
                 } else {
-                    String[] spilted = expression.split("-");
                     if (spilted.length == 3) {
                         expression = ExtraUtils.replaceAll(expression, "全服限制开启条件-全服已抽物品次数-次数", String.valueOf(data.requirementList.get(0).split(" ")[2]));
                     } else if (spilted.length == 4) {
@@ -312,13 +330,20 @@ public class LotteryData {
                 }
             }
         }
-        expression = ExtraUtils.replaceAll(expression, "全服已抽此奖池次数", String.valueOf(data.poolTotalTime));
-        expression = ExtraUtils.replaceAll(expression, "玩家已抽此奖池次数", String.valueOf(data.poolPlayerTotalTime.get(data.player.getName())));
-        expression = ExtraUtils.replaceAll(expression, "全服已出此奖品次数", String.valueOf(data.totaltime));
-        expression = ExtraUtils.replaceAll(expression, "玩家已出此奖品次数", String.valueOf(data.playerDataMap.get(data.player.getName()).get("玩家已出次数")));
-        expression = ExtraUtils.replaceAll(expression, "玩家此奖品保底次数", String.valueOf(data.playerDataMap.get(data.player.getName()).get("玩家已保底次数")));
-        expression = ExtraUtils.replaceAll(expression, "玩家已出此奖品保底次数", String.valueOf(data.playerDataMap.get(data.player.getName()).get("玩家已出保底次数")));
-
+        expression = ExtraUtils.replaceAll(expression, "全服已抽此奖池次数", data.poolTotalTime);
+        expression = ExtraUtils.replaceAll(expression, "全服已出此奖品次数", data.totaltime);
+        if (expression.contains("玩家已抽此奖池次数")) {
+            expression = ExtraUtils.replaceAll(expression, "玩家已抽此奖池次数", data.poolPlayerTotalTime.get(data.player.getName()));
+        }
+        if (expression.contains("玩家已出此奖品次数")) {
+            expression = ExtraUtils.replaceAll(expression, "玩家已出此奖品次数", data.playerDataMap.get(data.player.getName()).get("玩家已出次数"));
+        }
+        if (expression.contains("玩家此奖品保底次数")) {
+            expression = ExtraUtils.replaceAll(expression, "玩家此奖品保底次数", data.playerDataMap.get(data.player.getName()).get("玩家已保底次数"));
+        }
+        if (expression.contains("玩家已出此奖品保底次数")) {
+            expression = ExtraUtils.replaceAll(expression, "玩家已出此奖品保底次数", data.playerDataMap.get(data.player.getName()).get("玩家已出保底次数"));
+        }
         return expression;
     }
 
@@ -334,9 +359,11 @@ public class LotteryData {
                     index++;
                 }
                 ItemMeta itemMeta = itemStack.getItemMeta();
-                List<String> lores = itemMeta.getLore();
-                lores.addAll(customLores);
-                itemMeta.setLore(lores);
+                if (itemMeta.hasLore()) {
+                    List<String> lores = itemMeta.getLore();
+                    lores.addAll(customLores);
+                    itemMeta.setLore(lores);
+                }
                 itemStack.setItemMeta(itemMeta);
             }
             if (!isEnabled) {
@@ -346,10 +373,8 @@ public class LotteryData {
                 itemStack.setItemMeta(itemMeta);
             }
             displayItemstack = itemStack;
-            return displayItemstack;
-        } else {
-            return displayItemstack;
         }
+        return displayItemstack;
     }
 
     public void preProcess2() {
@@ -357,12 +382,10 @@ public class LotteryData {
             if (configMap.containsKey("保底次数")) {
                 int configTime = (int) configMap.get("保底次数");
                 int playerTime = (int) playerDataMap.get(player.getName()).get("玩家已保底次数");
+                Map<String, Object> map1 = playerDataMap.get(player.getName());
                 if (playerTime < configTime) {
-                    Map<String, Object> map1 = playerDataMap.get(player.getName());
                     map1.put("玩家已保底次数", playerTime + 1);
-                    playerDataMap.put(player.getName(), map1);
                 } else {
-                    Map<String, Object> map1 = playerDataMap.get(player.getName());
                     map1.put("玩家已出次数", (int) map1.get("玩家已出次数") + 1);
                     map1.put("玩家已保底次数", 0);
                     map1.put("玩家已出保底次数", (int) map1.get("玩家已保底次数") + 1);
@@ -370,13 +393,17 @@ public class LotteryData {
                     if (floorLimit != 0 && floorLimit != -1 && (int)map1.get("玩家已出保底次数") >= floorLimit) {
                         isEnabled = false;
                     }
-                    GlobalConfig.floorList.put(player.getName(), reward);
-                    playerDataMap.put(player.getName(), map1);
+                    FloorUtil.addFloorReward(player.getUniqueId(), reward);
                 }
+                playerDataMap.put(player.getName(), map1);
                 serializeToYmlFile();
             }
         }
     }
+
+
+
+
 
     public void preProcess(String poolName, Player player) {
         ConfigurationSection section = dataConfig.getConfigurationSection("奖品数据");
@@ -395,7 +422,7 @@ public class LotteryData {
                     } else {
                         playerTime = 0;
                         LotteryReward reward = RewardContainer.getReward(rewardName);
-                        GlobalConfig.floorList.put(player.getName(), reward);
+                        FloorUtil.addFloorReward(player.getUniqueId(), reward);
                         playerTime2++;
                         playerSection.set("玩家已出保底数量", playerLimit);
                         playerSection.set("玩家已出次数", playerTime2);
@@ -404,7 +431,7 @@ public class LotteryData {
                 playerSection.set("玩家已保底次数", playerTime);
             }
             try {
-                poolConfig.save(new File("pools/"+poolName+".yml"));
+                poolConfig.save(new File("奖池/"+poolName+".yml"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -442,6 +469,20 @@ public class LotteryData {
             e.printStackTrace();
         }
 
+    }
+
+    public String getAttribute(String attribute, Player player) {
+        if (attribute.equalsIgnoreCase("全服已抽此奖池次数")) {
+            return String.valueOf(poolTotalTime);
+        }
+        if (attribute.equalsIgnoreCase("玩家已抽此奖池次数")) {
+            int time = poolPlayerTotalTime.get(player.getName());
+            return String.valueOf(time);
+        }
+        if (attribute.equalsIgnoreCase("全服已出此奖品次数")) {
+            return String.valueOf(totaltime);
+        }
+        return String.valueOf(playerDataMap.get(player.getName()).get(attribute));
     }
 
     public void refreshPlayerData(String playerName) {

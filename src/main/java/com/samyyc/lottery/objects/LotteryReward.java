@@ -5,14 +5,11 @@ import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
-import com.samyyc.lottery.utils.WarningUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.FileUtil;
 
 import java.io.File;
@@ -148,6 +145,7 @@ public class LotteryReward {
                     break;
                 case "全服广播":
                     Bukkit.broadcastMessage(a(split[1]));
+                    break;
                 case "vault加钱":
                     if(APIUtils.isVaultEnabled) {
                         APIUtils.addPlayerVaultEconomy(player, Integer.parseInt(split[1]));
@@ -163,7 +161,6 @@ public class LotteryReward {
 
             }
         }
-        Bukkit.getLogger().info("成功咯!");
     }
 
     private String a(String b) {

@@ -35,7 +35,7 @@ public class LogUtils {
                 file.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
-                Bukkit.getLogger().info(WarningUtil.FILE_ERROR.getMessage());
+                Bukkit.getLogger().info(Message.ERROR_FILE.getMessage());
             }
 
         } else {
@@ -55,7 +55,7 @@ public class LogUtils {
                 fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                Bukkit.getLogger().info(WarningUtil.FILE_ERROR.getMessage());
+                Bukkit.getLogger().info(Message.ERROR_FILE.getMessage());
             }
         }
     }

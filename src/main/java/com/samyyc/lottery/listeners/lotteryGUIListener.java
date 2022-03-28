@@ -1,10 +1,12 @@
 package com.samyyc.lottery.listeners;
 
 import com.samyyc.lottery.containers.GuiContainer;
+import com.samyyc.lottery.containers.InventoryContainer;
 import com.samyyc.lottery.objects.LotteryGUI;
 import com.samyyc.lottery.objects.LotteryInventory;
 import com.samyyc.lottery.objects.LotteryResult;
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.utils.Message;
 import com.samyyc.lottery.utils.TextUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -43,12 +45,12 @@ public class lotteryGUIListener implements Listener {
                     e.setCancelled(true);
                 }
             } else {
-                e.getWhoClicked().sendMessage(TextUtil.convertColor(GlobalConfig.PREFIX +"&c您已经在抽奖了!"));
+                e.getWhoClicked().sendMessage(Message.ERROR_ALREADY_IN_ROLLING.getMessage());
                 e.setCancelled(true);
                 return;
             }
-            if (GlobalConfig.getResults(e.getWhoClicked().getName()) != null && !GlobalConfig.getResults(e.getWhoClicked().getName()).isEmpty()) {
-                Iterator<LotteryResult> it = GlobalConfig.getResults(e.getWhoClicked().getName()).iterator();
+            if (GlobalConfig.getResults(e.getWhoClicked().getUniqueId()) != null && !GlobalConfig.getResults(e.getWhoClicked().getUniqueId()).isEmpty()) {
+                Iterator<LotteryResult> it = GlobalConfig.getResults(e.getWhoClicked().getUniqueId()).iterator();
                 while (it.hasNext()) {
                     LotteryResult result = it.next();
                     System.out.println(result.getSlot());
@@ -65,7 +67,7 @@ public class lotteryGUIListener implements Listener {
                 System.out.println(GlobalConfig.resultList);
             }
         } else if (e.getView().getTitle().contains(TextUtil.convertColor("&b抽奖背包 - "))) {
-            LotteryInventory lotteryInventory = new LotteryInventory((Player) e.getWhoClicked());
+            LotteryInventory lotteryInventory = InventoryContainer.getInventory(e.getWhoClicked().getUniqueId());
             Pattern pattern = Pattern.compile("(?<=第)(\\d+)(?=页)");
             Matcher matcher = pattern.matcher(e.getView().getTitle());
             matcher.find();
@@ -81,12 +83,12 @@ public class lotteryGUIListener implements Listener {
     public void onPlayerCloseInventory(InventoryCloseEvent e) {
         if (GuiContainer.getGUI(e.getPlayer().getUniqueId()) != null && !GlobalConfig.rollingPlayerList.contains((Player) e.getPlayer())) {
             if (!GlobalConfig.resultList.isEmpty()) {
-                List<LotteryResult> resultList = GlobalConfig.resultList.get(e.getPlayer().getName());
+                List<LotteryResult> resultList = GlobalConfig.resultList.get(e.getPlayer().getUniqueId());
                 for (LotteryResult result : resultList ) {
-                    LotteryInventory lotteryInventory = new LotteryInventory((Player)  e.getPlayer());
+                    LotteryInventory lotteryInventory = InventoryContainer.getInventory(e.getPlayer().getUniqueId());
                     lotteryInventory.addReward(result.getLotteryReward());
                 }
-                GlobalConfig.resultList.put(e.getPlayer().getName(), new ArrayList<>());
+                GlobalConfig.resultList.put(e.getPlayer().getUniqueId(), new ArrayList<>());
             }
             GuiContainer.removeGUI(e.getPlayer().getUniqueId());
         }

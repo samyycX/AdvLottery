@@ -5,6 +5,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.Bukkit;
+import org.bukkit.Warning;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import com.samyyc.lottery.Lottery;
@@ -38,19 +39,19 @@ public class APIUtils {
         isPlaceholderAPIEnabled = (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null);
 
         if (isVaultEnabled) {
-            Bukkit.getLogger().info(TextUtil.convertColor(GlobalConfig.PREFIX +"&a已找到并成功链接Vault插件!"));
+            Bukkit.getLogger().info(Message.SUCCESS_API_HOOK_VAULT.getMessage());
         } else {
-            Bukkit.getLogger().info(TextUtil.convertColor(GlobalConfig.PREFIX +"&c未找到Vault插件!(&e不影响插件使用"));
+            Bukkit.getLogger().info(Message.WARNING_API_HOOK_VAULT.getMessage());
         }
         if (isPlaceholderAPIEnabled) {
-            Bukkit.getLogger().info(TextUtil.convertColor(GlobalConfig.PREFIX +"&a已找到并成功链接PlaceHolderAPI插件!"));
+            Bukkit.getLogger().info(Message.SUCCESS_API_HOOK_PLACEHOLDERAPI.getMessage());
         } else {
-            Bukkit.getLogger().info(TextUtil.convertColor(GlobalConfig.PREFIX +"&c未找到PlaceHolderAPI插件!(&e不影响插件使用"));
+            Bukkit.getLogger().info(Message.WARNING_API_HOOK_PLACEHOLDERAPI.getMessage());
         }
         if (isPlayerPointsEnabled) {
-            Bukkit.getLogger().info(TextUtil.convertColor(GlobalConfig.PREFIX +"&a已找到并成功链接PlayerPoints插件!"));
+            Bukkit.getLogger().info(Message.SUCCESS_API_HOOK_PLAYERPOINTS.getMessage());
         } else {
-            Bukkit.getLogger().info(TextUtil.convertColor(GlobalConfig.PREFIX +"&c未找到PlayerPoints插件!(&e不影响插件使用)"));
+            Bukkit.getLogger().info(Message.WARNING_API_HOOK_PLAYERPOINTS.getMessage());
         }
     }
 
