@@ -5,11 +5,10 @@ import com.samyyc.lottery.objects.*;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.FloorUtil;
 import com.samyyc.lottery.utils.LogUtils;
-import com.samyyc.lottery.utils.Message;
+import com.samyyc.lottery.enums.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -23,13 +22,15 @@ public class ScriptRunnable implements Runnable {
     private Player player;
     private LotteryPool pool;
     private Map<String, ItemStack> itemMap;
+    private Map<String, LotteryData> dataMap;
 
-    public ScriptRunnable(String script, Player player, LotteryPool pool, Map<String, ItemStack> itemMap) {
+    public ScriptRunnable(String script, Player player, LotteryPool pool, Map<String, ItemStack> itemMap, Map<String, LotteryData> dataMap) {
         this.script = script;
         this.inventory = player.getOpenInventory().getTopInventory();
         this.player = player;
         this.pool = pool;
         this.itemMap = itemMap;
+        this.dataMap = dataMap;
     }
 
     public ScriptRunnable(String script, Inventory inventory, Player player, LotteryPool pool, Map<String, ItemStack> itemMap) {
@@ -113,7 +114,7 @@ public class ScriptRunnable implements Runnable {
                 }
                 player.playNote(player.getLocation(), instrument, Note.natural(1, tone));
             } else if (script.startsWith("随机奖品")) {
-                LotteryData data = pool.roll();
+                LotteryData data = pool.roll(dataMap);
                 int slot = Integer.parseInt(script.split(" ")[1]);
                 LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
                 gui.inventory().setItem(slot, data.getDisplayItemStack());

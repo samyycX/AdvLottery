@@ -7,7 +7,7 @@ import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.runnables.ScriptRunnable;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.TextUtil;
-import com.samyyc.lottery.utils.Message;
+import com.samyyc.lottery.enums.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -37,9 +37,11 @@ public class LotteryGUI {
 
     private Player player;
 
+    private Map<String, LotteryData> dataMap;
+
     public LotteryGUI(String title, Player player) {
         this.pool = PoolContainer.getPool(title);
-        pool.invalidFilter(player);
+        dataMap = pool.invalidFilter(player);
         this.poolName = pool.getName();
         this.GUIName = pool.getGUIName();
         this.player = player;
@@ -48,6 +50,7 @@ public class LotteryGUI {
 
     public LotteryGUI(LotteryPool pool, Player player) {
         this.pool = pool;
+        dataMap = pool.invalidFilter(player);
         this.poolName = pool.getName();
         this.GUIName = pool.getGUIName();
         this.player = player;
@@ -84,8 +87,7 @@ public class LotteryGUI {
                 ItemStack itemStack = ExtraUtils.generateItemstackFromYml(itemSection);
                 inventory.setItem(slot, itemStack);
             } else {
-                LotteryData data = new LotteryData(pool.getConfig(), poolName, itemName, player);
-                inventory.setItem(slot, data.getDisplayItemStack());
+                inventory.setItem(slot, pool.getReward(itemName).getDisplayItemStack());
             }
         }
 
@@ -231,7 +233,7 @@ public class LotteryGUI {
             if (delay == 0) {
                 if (!script.startsWith("延时")) {
                     if (GlobalConfig.TEMP.get(player.getUniqueId()) == null) {
-                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap);
+                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap, dataMap);
                         runnable.run();
                     }
                 } else {
@@ -241,7 +243,7 @@ public class LotteryGUI {
             } else {
                 if (!script.startsWith("延时")) {
                     if (GlobalConfig.TEMP.get(player.getUniqueId()) == null) {
-                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap);
+                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap, dataMap);
                     Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), runnable, delay);
                     }
                 } else {

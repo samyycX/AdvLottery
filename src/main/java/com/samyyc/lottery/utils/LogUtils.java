@@ -1,6 +1,7 @@
 package com.samyyc.lottery.utils;
 
 import com.samyyc.lottery.Lottery;
+import com.samyyc.lottery.enums.Message;
 import org.bukkit.Bukkit;
 
 import java.io.*;

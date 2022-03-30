@@ -6,7 +6,7 @@ import com.samyyc.lottery.containers.GuiContainer;
 import com.samyyc.lottery.containers.InventoryContainer;
 import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.containers.RewardContainer;
-import com.samyyc.lottery.objects.LotteryData;
+import com.samyyc.lottery.enums.Message;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -212,47 +212,6 @@ public class ExtraUtils {
         buffer.replace(start, end, text);
         return buffer.toString();
 
-    }
-
-
-    public static String processFormattedVariable(LotteryData data, String text) {
-        if (!text.contains("{")) return text;
-        String oriori = text;
-        int startPoint;
-        int endPoint;
-        startPoint = text.indexOf("{");
-        endPoint = text.lastIndexOf("}");
-        if (text.replaceFirst("\\{","").contains("{")) {
-            text = text.replace(text.substring(endPoint + 1), "");
-            text = text.replace(text.substring(0, startPoint + 1), "");
-        } else {
-            text = text.replace(text.substring(0, text.indexOf("{")), "");
-        }
-        String original = text;
-        Pattern pattern = Pattern.compile("(?<=\\{).*?(?=})");
-        Matcher matcher = pattern.matcher(original);
-        int matchCount = 0;
-        while (matcher.find(matchCount)) {
-            String text2 = original.substring(matcher.start(), matcher.end());
-            text2 = data.replace(data, text2);
-            if ( text2.contains("~")) {
-                Pattern pattern2 = Pattern.compile("(.*)~(.*)~(.*)");
-                Matcher matcher2 = pattern2.matcher(text2);
-                matcher2.find();
-                text2 = matcher2.group(3);
-            }
-            text = Insert(matcher.start()-(original.length() - text.length()), matcher.end()-(original.length() - text.length()), text2,text);
-
-            matchCount = matcher.end();
-        }
-        if (text.contains("+") || text.contains("-") || text.contains("*") || text.contains("/") || text.contains("(") || text.contains(")")) {
-            text = text.replace("{","");
-            text = text.replace("}","");
-            double result = Calculator.executeExpression(text);
-            return ExtraUtils.Insert(startPoint, endPoint, String.valueOf(result), oriori).replace("}","").replace("{","");
-        } else {
-            return ExtraUtils.Insert(startPoint, endPoint, text, oriori).replace("}","").replace("{","");
-        }
     }
 
     public static String processStatement(String statement, Map<String, String> variableMap) {

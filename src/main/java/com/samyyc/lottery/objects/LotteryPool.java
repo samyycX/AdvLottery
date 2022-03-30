@@ -4,11 +4,10 @@ import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
-import com.samyyc.lottery.utils.Message;
+import com.samyyc.lottery.enums.Message;
 import com.samyyc.lottery.utils.TextUtil;
 import com.sun.istack.internal.Nullable;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -40,7 +39,7 @@ public class LotteryPool {
     // 奖池所有奖品(带概率)
     //private List<LotteryData> lotteryDataMap = new ArrayList<>();
 
-    private HashMap<LotteryData, Integer> lotteryChanceMap = new HashMap<>();
+    private LotteryPoolData poolData;
 
     // 前置条件
     private List<String> requirement = new ArrayList<>();
@@ -62,27 +61,8 @@ public class LotteryPool {
         initialize(false, isOp, null);
     }
 
-    public void invalidFilter(Player player) {
-        if (isEnabled) {
-            Iterator<LotteryData> iterator = lotteryChanceMap.keySet().iterator();
-            while (iterator.hasNext()) {
-                LotteryData data = iterator.next();
-                data.initializePlayerData(player);
-                if (!data.isEnabled) {
-                    iterator.remove();
-                }
-            }
-
-            Iterator<Map.Entry<LotteryData, Integer>> it = lotteryChanceMap.entrySet().iterator();
-
-            while (it.hasNext()) {
-                Map.Entry<LotteryData, Integer> entry = it.next();
-                entry.getKey().initializePlayerData(player);
-                if (entry.getKey().getDisplayItemStack().getType() == Material.BARRIER || entry.getKey().getDisplayItemStack().getItemMeta().getDisplayName().contains(TextUtil.convertColor("&c&l不可用"))) {
-                    it.remove();
-                }
-            }
-        }
+    public Map<String, LotteryData> invalidFilter(Player player) {
+        return poolData.invalidFilter(player);
     }
 
     /**
@@ -104,29 +84,21 @@ public class LotteryPool {
     // %奖池A_aa%
     // %奖池A_奖品A_全服已出此奖品次数%
     public String getRewardData(Player player, String args) {
-        System.out.println(args);
+
         String[] split = args.split("_");
         if (split.length == 2) {
-            String poolName = split[0];
             String attribute = split[1];
-            LotteryData data = (LotteryData) lotteryChanceMap.keySet().toArray()[0];
-            if (attribute.equals("全服已抽此奖池次数")) {
-                return String.valueOf(data.poolTotalTime);
-            } else if (attribute.equals("玩家已抽此奖池次数")) {
-                return String.valueOf(data.playerDataMap.get(player.getName()));
-            } else {
-                return null;
-            }
+            return poolData.getAttribute(attribute, null, player);
         } else if (split.length == 3) {
             String rewardName = split[1];
             String attribute = split[2];
-            for (LotteryData data : lotteryChanceMap.keySet() ) {
-                if (data.getReward().getRewardName().equals(rewardName)) {
-                    return data.getAttribute(attribute, player);
-                }
-            }
+            return poolData.getAttribute(attribute, rewardName, player);
         }
         return null;
+    }
+
+    public LotteryData getReward(String rewardName) {
+        return poolData.getReward(rewardName);
     }
 
     /**
@@ -227,28 +199,12 @@ public class LotteryPool {
                 }
                 line++;
             }
-            return true;
-        } else return true;
+        }
+        return true;
     }
 
     public void initializeReward(String rewardName) {
-        if ( config.getConfigurationSection("奖品列表."+rewardName) != null) {
-            ConfigurationSection section = config.createSection("奖品列表."+rewardName);
-            section.set("真实概率", 0);
-            section.set("显示概率", "example");
-            section.set("物品限量", 0);
-            section.set("保底次数", 0);
-            section.set("保底限量", 0);
-            section.set("全服限制数量", 0);
-            section.set("lores", new ArrayList<String>().add("测试"));
-            try {
-                config.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        LotteryData data = new LotteryData(config, name, rewardName, null);
-        initialize(false, true, null);
+       poolData.initReward(rewardName);
     }
 
     /**
@@ -277,11 +233,6 @@ public class LotteryPool {
                 return;
             }
         }
-        if ( sender instanceof Player) {
-            for ( LotteryData data : lotteryChanceMap.keySet() ) {
-                data.initializePlayerData((Player) sender);
-            }
-        }
 
         config = YamlConfiguration.loadConfiguration(file);
 
@@ -289,22 +240,8 @@ public class LotteryPool {
         // 启用
         isEnabled = config.getBoolean("启用");
 
-        // 奖励池物品获取 ("奖池A.奖品列表")
-        ConfigurationSection rewardsSection = config.getConfigurationSection("奖品列表");
-        Set<String> set = rewardsSection.getKeys(false);
-        if (set.size() != 0) {
-            for ( String rewardName : set ) {
-                LotteryData lotteryData;
-                if (sender instanceof Player) {
-                     lotteryData = new LotteryData(config, name, rewardName, (Player) sender);
-                } else {
-                    lotteryData = new LotteryData(config, name, rewardName, null);
-                }
-                lotteryChanceMap.put(lotteryData, (int)lotteryData.configMap.get("真实概率"));
-
-
-            }
-        }
+        // 奖品数据
+        poolData = new LotteryPoolData(name, config);
 
         //初始化前置条件
         requirement = config.getStringList("前置条件");
@@ -320,53 +257,26 @@ public class LotteryPool {
     }
 
 
-    public LotteryData roll() {
-        Random random = new Random();
-
-        int sum = 0;
-        for ( int value : lotteryChanceMap.values() ) {
-            sum+=value;
-        }
-
-        int rand = random.nextInt(sum)+1;
-
-        for (Map.Entry<LotteryData, Integer> entry: lotteryChanceMap.entrySet() ) {
-            rand -= entry.getValue();
-            if (rand<=0) {
-                return entry.getKey();
-            }
-        }
-        return null;
+    public LotteryData roll(Map<String, LotteryData> dataMap) {
+       return poolData.roll(dataMap);
     }
+
 
     public LotteryData getDataByItemstack(ItemStack itemStack) {
-        for (LotteryData data : lotteryChanceMap.keySet() ) {
-            ItemStack dataItemstack = data.getDisplayItemStack();
-            if (
-                    dataItemstack.getType().equals(itemStack.getType())
-                    && dataItemstack.getAmount() == itemStack.getAmount()
-                    && dataItemstack.getItemMeta().getDisplayName().equals(itemStack.getItemMeta().getDisplayName())
-            ) {
-                return data;
-            }
-        }
-        return null;
+        return poolData.getDataByItemstack(itemStack);
     }
 
-    public void refreshPlayerData(CommandSender player) {
+    public void refreshPlayerData(Player player) {
         if (playerRefreshRequirement.isEmpty()) return;
-        if (runRequirement(player, 1, playerRefreshRequirement))
-        for (LotteryData data : lotteryChanceMap.keySet() ) {
-            data.refreshPlayerData(player.getName());
+        if (runRequirement(player, 1, playerRefreshRequirement)) {
+            poolData.refreshPlayerData(player);
         }
     }
 
     public void refreshGlobalData(CommandSender player) {
         if (globalRefreshRequirement.isEmpty()) return;
         if (runRequirement(player, 1, globalRefreshRequirement)) {
-            for (LotteryData data : lotteryChanceMap.keySet()) {
-                data.refreshGlobalData();
-            }
+            poolData.refreshGlobalData();
         }
     }
 

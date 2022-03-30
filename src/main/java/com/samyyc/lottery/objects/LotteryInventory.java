@@ -3,7 +3,7 @@ package com.samyyc.lottery.objects;
 import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.utils.TextUtil;
-import com.samyyc.lottery.utils.Message;
+import com.samyyc.lottery.enums.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;

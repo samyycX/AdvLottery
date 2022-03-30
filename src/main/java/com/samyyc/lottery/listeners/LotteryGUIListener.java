@@ -6,7 +6,7 @@ import com.samyyc.lottery.objects.LotteryGUI;
 import com.samyyc.lottery.objects.LotteryInventory;
 import com.samyyc.lottery.objects.LotteryResult;
 import com.samyyc.lottery.configs.GlobalConfig;
-import com.samyyc.lottery.utils.Message;
+import com.samyyc.lottery.enums.Message;
 import com.samyyc.lottery.utils.TextUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class lotteryGUIListener implements Listener {
+public class LotteryGUIListener implements Listener {
 
     @EventHandler
     public static void onPlayerInteractLotteryGUIEvent(InventoryClickEvent e) {

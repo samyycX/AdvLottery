@@ -1,6 +1,7 @@
-package com.samyyc.lottery.utils;
+package com.samyyc.lottery.enums;
 
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.utils.TextUtil;
 import org.bukkit.command.CommandSender;
 
 public enum Message {

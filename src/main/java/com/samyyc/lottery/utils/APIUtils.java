@@ -1,11 +1,11 @@
 package com.samyyc.lottery.utils;
 
 import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.enums.Message;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.Bukkit;
-import org.bukkit.Warning;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import com.samyyc.lottery.Lottery;
