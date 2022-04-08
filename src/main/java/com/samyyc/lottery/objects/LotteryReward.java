@@ -1,6 +1,7 @@
 package com.samyyc.lottery.objects;
 
 import com.samyyc.lottery.Lottery;
+import com.samyyc.lottery.apis.APIContainer;
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
@@ -120,20 +121,11 @@ public class LotteryReward {
         }
     }
 
-
-    /**
-     * 执行奖励脚本
-     * @param player 受奖励的玩家
-     */
-    public void execute(Player player) {
-        // TODO: incomplete
+    public void preExecute(Player player) {
         List<String> taskList = config.getStringList("奖励");
         for ( String command : taskList ) {
             String[] split = command.split(" ", 2);
             switch (split[0].toLowerCase()) {
-                case "给予物品":
-                    player.getInventory().addItem(rewardItemStackMap.get(split[1]));
-                    break;
                 case "玩家运行指令":
                     player.performCommand(a(split[1]));
                     break;
@@ -147,7 +139,7 @@ public class LotteryReward {
                     Bukkit.broadcastMessage(a(split[1]));
                     break;
                 case "vault加钱":
-                    if(APIUtils.isVaultEnabled) {
+                    if (APIUtils.isVaultEnabled) {
                         APIUtils.addPlayerVaultEconomy(player, Integer.parseInt(split[1]));
                     }
                     break;
@@ -157,8 +149,25 @@ public class LotteryReward {
                     }
                     break;
                 default:
-                    GlobalConfig.taskMap.get(split[0]).run(player, command, 1);
+                    APIContainer.preRewardMap.get(split[0]).run(player, command);
 
+            }
+        }
+    }
+    /**
+     * 执行奖励脚本
+     * @param player 受奖励的玩家
+     */
+    public void execute(Player player) {
+        List<String> taskList = config.getStringList("奖励");
+        for (String command : taskList) {
+            String[] split = command.split(" ");
+            if (split[0].equals("给予物品")) {
+                player.getInventory().addItem(rewardItemStackMap.get(split[1]));
+            } else {
+                if (APIContainer.rewardMap.containsKey(split[0])) {
+                    APIContainer.rewardMap.get(split[0]).run(player, command);
+                }
             }
         }
     }

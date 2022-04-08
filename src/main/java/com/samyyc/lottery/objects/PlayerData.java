@@ -1,5 +1,6 @@
 package com.samyyc.lottery.objects;
 
+import com.samyyc.lottery.configs.GlobalConfig;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -12,23 +13,23 @@ import java.util.Map;
 
 public class PlayerData {
 
-    private Map<String, Object> dataMap = new HashMap<>();
+    private Map<String, Integer> dataMap = new HashMap<>();
     private ConfigurationSection section;
 
     public PlayerData(ConfigurationSection section) {
         this.section = section;
         for ( String key : section.getKeys(false) ) {
-            dataMap.put(key, section.get(key));
+            dataMap.put(key, section.getInt(key));
         }
     }
 
 
-    public Map<String, Object> getDataMap() {
+    public Map<String, Integer> getDataMap() {
         return dataMap;
     }
 
     public String getAttribute(String attribute) {
-        for (Map.Entry<String, Object> entry : dataMap.entrySet() ) {
+        for (Map.Entry<String, Integer> entry : dataMap.entrySet() ) {
             if (entry.getKey().equalsIgnoreCase(attribute)) {
                 return String.valueOf(entry.getValue());
             }
@@ -45,5 +46,39 @@ public class PlayerData {
         section.set("玩家已出次数", 0);
         section.set("玩家已保底次数", 0);
         section.set("玩家已出保底次数", 0);
+    }
+
+    public void addTime() {
+        addData("玩家已出次数");
+        addFloorTime();
+    }
+
+    public void addFloorTime() {
+        addData("玩家已保底次数");
+    }
+
+    public void addFlooredTime() {
+        addData("玩家已出保底次数");
+    }
+
+    public void addData(String key) {
+        int time = dataMap.get(key);
+        dataMap.put(key, ++time);
+        section.set(key, time);
+    }
+
+    public int getFloorTime() {
+        return dataMap.get("玩家已保底次数");
+    }
+    public void resetFloorTime() {
+        section.set("玩家已保底次数", 0);
+    }
+
+    public boolean check(int floorLimit) {
+        if (floorLimit != 0 && floorLimit != -1) {
+            return dataMap.get("玩家已保底次数") >= floorLimit;
+        } else {
+            return false;
+        }
     }
 }

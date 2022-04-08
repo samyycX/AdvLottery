@@ -1,13 +1,13 @@
 package com.samyyc.lottery.miscs;
 
-public class VariableKeyValue {
+public class KV {
 
     private String key;
     private int value;
 
-    public VariableKeyValue(){}
+    public KV(){}
 
-    public VariableKeyValue(String key, int value) {
+    public KV(String key, int value) {
         this.key = key;
         this.value = value;
     }
@@ -16,7 +16,7 @@ public class VariableKeyValue {
         return key;
     }
 
-    public VariableKeyValue setKey(String key) {
+    public KV setKey(String key) {
         this.key = key;
         return this;
     }
@@ -25,7 +25,7 @@ public class VariableKeyValue {
         return value;
     }
 
-    public VariableKeyValue setValue(int value) {
+    public KV setValue(int value) {
         this.value = value;
         return this;
     }

@@ -6,6 +6,7 @@ import com.samyyc.lottery.containers.GuiContainer;
 import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.runnables.ScriptRunnable;
 import com.samyyc.lottery.utils.ExtraUtils;
+import com.samyyc.lottery.utils.FloorUtil;
 import com.samyyc.lottery.utils.TextUtil;
 import com.samyyc.lottery.enums.Message;
 import org.bukkit.Bukkit;
@@ -59,7 +60,7 @@ public class LotteryGUI {
 
     public void showInventory(Player player) {
         player.openInventory(inventory);
-        GuiContainer.addGUI(player.getUniqueId(), this);
+        GuiContainer.add(player.getUniqueId(), this);
     }
 
     public void getInventoryFromYml() {
@@ -205,17 +206,21 @@ public class LotteryGUI {
                             }
                         }
                     }
-                    ListIterator<String> listIterator = processable.listIterator();
-                    System.out.println(processable);
-                    while (listIterator.hasNext()) {
-                        String statement = listIterator.next();
+                    for(int i = 0; i < processable.size(); i++) {
+                        String statement = processable.get(i);
                         if (statement.startsWith("block-")) {
-                            listIterator.remove();
+                            processable.set(i, "");
                             //TODO: 添加变量
                             LotteryScript script = scriptList.get(statement.replace("block-", ""));
-                            script.processBlock(variableMap).forEach(listIterator::add);
+                            script.processBlock(variableMap).forEach(s -> {
+                                if (s.startsWith("保底格")) {
+                                    processable.add(0, s);
+                                } else {
+                                    processable.add(s);
+                                }
+                            });
                         } else {
-                            listIterator.set(ExtraUtils.processStatement(statement, variableMap));
+                            processable.set(i, ExtraUtils.processStatement(statement, variableMap));
                         }
                     }
                     GlobalConfig.GUIScriptList.put(GUIName+"."+scriptName, processable);
@@ -228,12 +233,18 @@ public class LotteryGUI {
     public void runScript(String scriptName,Player player) {
         int delay = 0;
         GlobalConfig.rollingPlayerList.add(player);
-        System.out.println(GlobalConfig.GUIScriptList.get(GUIName+"."+scriptName));
+        boolean inFloorMode = FloorUtil.hasFloorData(player.getUniqueId());
+        List<Integer> floorLists = new ArrayList<>();
+        for ( String s : GlobalConfig.GUIScriptList.get(GUIName+"."+scriptName)) {
+            if (!s.startsWith("保底格")) break;
+            int slot = Integer.parseInt(s.split(" ")[1]);
+            floorLists.add(slot);
+        }
         for (String script : GlobalConfig.GUIScriptList.get(GUIName+"."+scriptName)) {
             if (delay == 0) {
                 if (!script.startsWith("延时")) {
                     if (GlobalConfig.TEMP.get(player.getUniqueId()) == null) {
-                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap, dataMap);
+                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap, dataMap, floorLists);
                         runnable.run();
                     }
                 } else {
@@ -243,7 +254,7 @@ public class LotteryGUI {
             } else {
                 if (!script.startsWith("延时")) {
                     if (GlobalConfig.TEMP.get(player.getUniqueId()) == null) {
-                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap, dataMap);
+                        ScriptRunnable runnable = new ScriptRunnable(script, player, pool, itemMap, dataMap, floorLists);
                     Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), runnable, delay);
                     }
                 } else {
@@ -291,7 +302,9 @@ public class LotteryGUI {
                 case "直接抽奖":
                     int time = Integer.parseInt(task.split(" ")[1]);
                     for (int i = 0; i < time; i++) {
-                        //LotteryInventory
+                        LotteryData data = pool.roll(pool.invalidFilter(player));
+                        data.preExecute(player);
+                        data.execute(player);
                     }
                     break;
                 case "转到gui":
@@ -300,152 +313,7 @@ public class LotteryGUI {
                     gui.showInventory(player);
             }
 
-
-                /*
-                String lineName = task.split(" ", 2)[1];
-                LotteryLine line = new LotteryLine(lineName, config);
-                final int[] times = {0};
-                final int[] totalTimes = {0};
-                GlobalConfig.rollingPlayerList.add(player);
-
-                List<Integer> countList = new LinkedList<>();
-                int count = 0;
-                int time = 0;
-                for ( int slot2 : line.slots.keySet()) {
-                    String type = line.slots.get(slot2);
-                    if ("正常".equals(type)) {
-                        count++;
-                    } else {
-                        countList.add(count);
-                        count++;
-                        time++;
-                    }
-                }
-
-                final LotteryData[] data2 = new LotteryData[1];
-
-                final int[] finalSlot = {0};
-
-
-
-                boolean enable;
-                if (task.contains("赠送抽奖")) {
-                    enable = true;
-                } else {
-                    enable = pool.runRequirement(player, time);
-                }
-                if (!enable) {
-                    GlobalConfig.rollingPlayerList.remove(player);
-                    return;
-                }
-
-                BukkitRunnable runnable = new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        LotteryData data = pool.roll();
-                        if (totalTimes[0] != line.rollTime) {
-                            int originSlot = line.indexedSlots.get(0);
-                            times[0] = totalTimes[0] % line.indexedSlots.size();
-                            data.initializePlayerData(player);
-                            if (inventory.getItem(originSlot) == null || inventory.getItem(originSlot).getType() == Material.AIR) {
-                                inventory.setItem(originSlot, data.getDisplayItemStack());
-                            } else {
-                                HashMap<Integer, ItemStack> itemStackMap = new LinkedHashMap<>();
-                                for (int slot : line.indexedSlots) {
-                                    ItemStack item = (inventory.getItem(slot) != null) ? inventory.getItem(slot) : new ItemStack(Material.AIR);
-                                    itemStackMap.put(slot, item);
-                                }
-                                data.initializePlayerData(player);
-                                itemStackMap = ExtraUtils.insertItem(itemStackMap, data.getDisplayItemStack());
-                                for (Map.Entry<Integer, ItemStack> entry : itemStackMap.entrySet()) {
-                                    inventory.setItem(entry.getKey(), entry.getValue());
-                                }
-                            }
-
-                            player.openInventory(inventory);
-                            for (Integer finalCount : countList) {
-                                if (totalTimes[0] + finalCount == line.rollTime) {
-                                    finalSlot[0] = line.indexedSlots.get(finalCount);
-                                    data.preProcess(poolName, player);
-                                    if (!GlobalConfig.floorList.isEmpty()) {
-                                        LotteryResult result = new LotteryResult(player, finalSlot[0], GlobalConfig.floorList.get(player.getName()));
-                                        GlobalConfig.resultList.add(result);
-                                        inventory.setItem(finalSlot[0], GlobalConfig.floorList.get(player.getName()).getDisplayItem());
-                                        GlobalConfig.floorList.remove(player.getName());
-                                        countList.remove(finalCount);
-                                    } else {
-                                        LotteryResult result = new LotteryResult(player, finalSlot[0], data.reward);
-                                        GlobalConfig.resultList.add(result);
-                                        countList.remove(finalCount);
-                                    }
-                                }
-                            }
-                        }
-                        totalTimes[0]++;
-                        player.playNote(player.getLocation(), Instrument.BELL, Note.flat(1, Note.Tone.G));
-                    }
-                };
-                int x = 0;
-                // x(x+1)+1 < N
-                while (true) {
-                    int n = (int) Math.pow(x, 2) + x + 1;
-                    if ( n<line.rollTime ) {
-                        x++;
-                    } else if (n >line.rollTime){
-                        x--;
-                        break;
-                    } else break;
-                }
-                List<Integer> periodList = new LinkedList<>();
-                int n = 1;
-                for ( int i = x; i > 0; i--) {
-                    for (int j = 1; j <=x; j++) {
-                        if ( 2*n > 8) {
-                            periodList.add(1);
-                        } else {
-                            periodList.add(2*n);
-                        }
-                    }
-                    n++;
-                }
-
-                if (periodList.size() < line.rollTime) {
-                    int i = periodList.size();
-                    while ( i < line.rollTime) {
-                        periodList.add(2);
-                        i++;
-                    }
-                }
-
-                periodList.sort(Integer::compareTo);
-                int lastPeriod = 0;
-                int timess = 0;
-                for ( Integer period : periodList ) {
-                    period = period + line.eachTime - periodList.get(0);
-                    period += lastPeriod;
-                    Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), runnable, period);
-                    timess++;
-                    lastPeriod = period;
-                }
-
-                Bukkit.getScheduler().runTaskLater(Lottery.getInstance(), new Runnable() {
-                    @Override
-                    public void run() {
-                        player.playNote(player.getLocation(), Instrument.BELL, Note.flat(1, Note.Tone.C));
-                        for ( int slot : line.slots.keySet()) {
-                            String type = line.slots.get(slot);
-                            if ("正常".equals(type)) {
-                                inventory.setItem(slot, new ItemStack(Material.BARRIER));
-                                player.openInventory(inventory);
-                            }
-                            GlobalConfig.rollingPlayerList.remove(player);
-                        }
-                    }
-                }, lastPeriod+periodList.get(periodList.size()-1));
-
-
-                 */
         }
     }
-}
 
+}

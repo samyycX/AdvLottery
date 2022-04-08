@@ -164,6 +164,7 @@ public class LotteryPool {
                 String[] split = task.split(" ", 2);
                 String type = split[0];
                 String arg = split[1];
+                arg = arg.replace("{player}", player.getName());
                 switch (type.toLowerCase()) {
                     case "消耗物品":
                         String itemName = arg.split(" ")[0];
@@ -188,7 +189,7 @@ public class LotteryPool {
                         Bukkit.dispatchCommand(player, arg);
                     case "全服广播":
                         Bukkit.broadcastMessage(arg);
-                    case "个人广播":
+                    case "玩家广播":
                         player.sendMessage(arg);
                     default:
                         if (APIUtils.invokeCustomLotteryTask(type, player, task, Integer.parseInt(arg) * times, false)) {

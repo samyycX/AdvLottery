@@ -1,6 +1,6 @@
 package com.samyyc.lottery.objects;
 
-import com.samyyc.lottery.miscs.VariableKeyValue;
+import com.samyyc.lottery.miscs.KV;
 import com.samyyc.lottery.utils.ExtraUtils;
 
 import java.util.*;
@@ -140,14 +140,14 @@ public class LotteryScript implements Iterable<LotteryScript> {
         if (variableMap == null) variableMap = new HashMap<>();
 
 
-        final LinkedList<VariableKeyValue> timesList = new LinkedList<>();
+        final LinkedList<KV> timesList = new LinkedList<>();
 
         Iterator<LotteryScript> iterator = iterator();
-        timesList.add(new VariableKeyValue(name, loopTime));
+        timesList.add(new KV(name, loopTime));
         while (iterator.hasNext()) {
             LotteryScript stack = iterator.next();
             if (stack.loopTime!=0) {
-                timesList.add(new VariableKeyValue(stack.name, stack.loopTime));
+                timesList.add(new KV(stack.name, stack.loopTime));
             }
         }
 
@@ -201,7 +201,7 @@ public class LotteryScript implements Iterable<LotteryScript> {
                         }
                         loopVariableMap.putAll(variableMap);
                         statementList.add(ExtraUtils.processStatement(statement, loopVariableMap));
-                }
+                    }
             }
             valueChanged.clear();
         }

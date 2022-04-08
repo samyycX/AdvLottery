@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Map;
 
 public class ScriptRunnable implements Runnable {
@@ -23,22 +24,16 @@ public class ScriptRunnable implements Runnable {
     private LotteryPool pool;
     private Map<String, ItemStack> itemMap;
     private Map<String, LotteryData> dataMap;
+    private List<Integer> floorSlots;
 
-    public ScriptRunnable(String script, Player player, LotteryPool pool, Map<String, ItemStack> itemMap, Map<String, LotteryData> dataMap) {
+    public ScriptRunnable(String script, Player player, LotteryPool pool, Map<String, ItemStack> itemMap, Map<String, LotteryData> dataMap, List<Integer> floorSlots) {
         this.script = script;
         this.inventory = player.getOpenInventory().getTopInventory();
         this.player = player;
         this.pool = pool;
         this.itemMap = itemMap;
         this.dataMap = dataMap;
-    }
-
-    public ScriptRunnable(String script, Inventory inventory, Player player, LotteryPool pool, Map<String, ItemStack> itemMap) {
-        this.script = script;
-        this.inventory = inventory;
-        this.player = player;
-        this.pool = pool;
-        this.itemMap = itemMap;
+        this.floorSlots = floorSlots;
     }
 
     @Override
@@ -47,24 +42,26 @@ public class ScriptRunnable implements Runnable {
             if (script.startsWith("出奖")) {
                 String[] split = script.split(" ");
                 int targetSlot = Integer.parseInt(split[1]);
-                LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
-                LotteryReward reward;
+                LotteryGUI gui = GuiContainer.get(player.getUniqueId());
                 LotteryData data;
-                if (FloorUtil.hasFloorReward(player.getUniqueId())) {
-                    reward = FloorUtil.getFloorReward(player.getUniqueId());
-                    gui.inventory().setItem(targetSlot, reward.getDisplayItem());
-                } else {
-                    data = pool.getDataByItemstack(gui.inventory().getItem(targetSlot));
-                    reward = data.getReward();
-                    //data.preProcess2();
-                }
-                LotteryResult result = new LotteryResult(player, targetSlot, reward);
+                data = pool.getDataByItemstack(gui.inventory().getItem(targetSlot));
+                LotteryResult result = new LotteryResult(player, targetSlot, data);
                 GlobalConfig.putResult(player.getUniqueId(), result);
                 // TODO: 优化保底
                 LogUtils.addLog(Message.LOG_ROLL_SUCCESS.getMessage()
                         .replace("{playername}",player.getName())
                         .replace("{poolname}", pool.getName())
-                        .replace("{rewardname}",result.getLotteryReward().getRewardName()));
+                        .replace("{rewardname}",result.getLotteryData().getReward().getRewardName()));
+
+                floorSlots.forEach(slot -> {
+                    if (FloorUtil.hasFloorData(player.getUniqueId())) {
+                        LotteryData floorData = FloorUtil.getFloorData(player.getUniqueId());
+                        inventory.setItem(slot, floorData.getDisplayItemStack());
+                        LotteryResult result1 = new LotteryResult(player, slot, data);
+                    }
+                });
+                player.openInventory(inventory);
+
 
             } else if (script.startsWith("轮换物品")) {
                 String[] split = script.split(" ");
@@ -76,7 +73,7 @@ public class ScriptRunnable implements Runnable {
                     return;
                 }
                 //inventory.setItem(targetSlot, inventory.getItem(originSlot));
-                LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
+                LotteryGUI gui = GuiContainer.get(player.getUniqueId());
                 gui.inventory().setItem(targetSlot, gui.inventory().getItem(originSlot));
                 gui.showInventory(player);
                 //player.getOpenInventory().getTopInventory().setItem(targetSlot, inventory.getItem(originSlot));
@@ -91,7 +88,7 @@ public class ScriptRunnable implements Runnable {
                 ItemStack item = itemMap.get(split[2]);
                 if (item != null) {
                     //inventory.setItem(originSlot, item);
-                    LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
+                    LotteryGUI gui = GuiContainer.get(player.getUniqueId());
                     gui.inventory().setItem(originSlot, item);
                     gui.showInventory(player);
                     //player.getOpenInventory().getTopInventory().setItem(originSlot, item);
@@ -116,7 +113,7 @@ public class ScriptRunnable implements Runnable {
             } else if (script.startsWith("随机奖品")) {
                 LotteryData data = pool.roll(dataMap);
                 int slot = Integer.parseInt(script.split(" ")[1]);
-                LotteryGUI gui = GuiContainer.getGUI(player.getUniqueId());
+                LotteryGUI gui = GuiContainer.get(player.getUniqueId());
                 gui.inventory().setItem(slot, data.getDisplayItemStack());
                 gui.showInventory(player);
                 //player.openInventory(inventory);

@@ -1,6 +1,6 @@
 package com.samyyc.lottery.utils;
 
-import com.samyyc.lottery.configs.GlobalConfig;
+import com.samyyc.lottery.apis.APIContainer;
 import com.samyyc.lottery.enums.Message;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import com.samyyc.lottery.Lottery;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import com.samyyc.lottery.apis.CustomLotteryTask;
+import com.samyyc.lottery.apis.ILotteryTask;
 
 public class APIUtils {
 
@@ -85,7 +85,7 @@ public class APIUtils {
     }
 
     public static boolean invokeCustomLotteryTask(String identifier, Player player, String task, int times, boolean run) {
-        CustomLotteryTask customLotteryTask = GlobalConfig.taskMap.get(identifier);
+        ILotteryTask customLotteryTask = APIContainer.taskMap.get(identifier);
         if ( customLotteryTask != null ) {
             boolean success = customLotteryTask.check(player, task, times);
             if (run) {

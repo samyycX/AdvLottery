@@ -1,7 +1,6 @@
 package com.samyyc.lottery.containers;
 
 import com.samyyc.lottery.objects.LotteryGUI;
-import org.bukkit.Bukkit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,15 +10,15 @@ public class GuiContainer {
 
     private static final Map<UUID, LotteryGUI> GUI_MAP = new HashMap<>();
 
-    public static LotteryGUI getGUI(UUID playerUUID) {
+    public static LotteryGUI get(UUID playerUUID) {
         return GUI_MAP.get(playerUUID);
     }
 
-    public static void addGUI(UUID playerUUID, LotteryGUI gui) {
+    public static void add(UUID playerUUID, LotteryGUI gui) {
         GUI_MAP.put(playerUUID, gui);
     }
 
-    public static void removeGUI(UUID playerUUID) {
+    public static void remove(UUID playerUUID) {
         GUI_MAP.remove(playerUUID);
     }
 

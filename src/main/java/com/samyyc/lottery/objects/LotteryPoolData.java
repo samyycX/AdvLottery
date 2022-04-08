@@ -20,9 +20,9 @@ public class LotteryPoolData {
     private ConfigurationSection poolConfig;
     // 数据文件里的数据
     private YamlConfiguration dataConfig;
-    // 封装的LotteryData
+    private File dataFile;
     // 不能被直接调用， 需要分玩家给出过滤后的对象
-    private Map<String, LotteryData> dataMap;
+    private Map<String, LotteryData> dataMap = new HashMap<>();
 
     // 公共数据
     private int globalTotalTime;
@@ -32,8 +32,9 @@ public class LotteryPoolData {
         this.poolConfig = poolConfig.getConfigurationSection("奖品列表");
         File file = new File(Lottery.getInstance().getDataFolder(), "数据\\"+poolName+".yml");
         if (!file.exists()) {
-            file = initializeNewDataFile(file);
+            initializeNewDataFile(file);
         }
+        this.dataFile = file;
         dataConfig = YamlConfiguration.loadConfiguration(file);
 
         // 下面的操作不可能导致空指针！
@@ -43,13 +44,16 @@ public class LotteryPoolData {
             playerTotalTimeMap.put(key, playerTotalTimeSection.getInt(key));
         }
 
-        for ( String rewardName : poolConfig.getKeys(false)) {
-            ConfigurationSection poolSection = poolConfig.getConfigurationSection(rewardName);
+        ConfigurationSection rewardSection = poolConfig.getConfigurationSection("奖品列表");
+        if (rewardSection == null) return;
+        for ( String rewardName : rewardSection.getKeys(false)) {
+            ConfigurationSection poolSection = rewardSection.getConfigurationSection(rewardName);
+            System.out.println(rewardName);
             ConfigurationSection dataSection = dataConfig.getConfigurationSection("奖品数据."+rewardName);
             LotteryData data = new LotteryData(rewardName, poolSection, dataSection);
+            data.giveConfig(dataConfig, file);
             dataMap.put(rewardName, data);
         }
-
     }
 
     public LotteryData roll(Map<String, LotteryData> dataMap) {
@@ -106,12 +110,14 @@ public class LotteryPoolData {
 
     public void refreshGlobalData() {
         dataMap.values().forEach(LotteryData::refreshGlobalData);
+        save();
     }
 
     public void refreshPlayerData(Player player) {
         dataMap.values().forEach(data -> {
             data.refreshPlayerData(player);
         });
+        save();
     }
 
     public LotteryData getDataByItemstack(ItemStack itemStack) {
@@ -134,9 +140,19 @@ public class LotteryPoolData {
         if (poolSection == null) {
             poolSection = poolConfig.createSection(rewardName);
             LotteryData.initPoolSection(poolSection);
+            save();
         }
         LotteryData data = new LotteryData(rewardName, poolSection, dataSection);
+        data.giveConfig(dataConfig, dataFile);
         dataMap.put(rewardName, data);
+    }
+
+    public void save() {
+        try {
+            dataConfig.save(dataFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public LotteryData getReward(String rewardName) {

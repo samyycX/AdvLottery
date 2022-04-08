@@ -1,13 +1,23 @@
 package com.samyyc.lottery.objects;
 
+import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.containers.RewardContainer;
+import com.samyyc.lottery.enums.Message;
 import com.samyyc.lottery.utils.Calculator;
+import com.samyyc.lottery.utils.FloorUtil;
 import com.samyyc.lottery.utils.TextUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import sun.applet.resources.MsgAppletViewer_es;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +39,9 @@ public class LotteryData {
     private int dataServerTime;
     private Map<String, PlayerData> dataPlayerDataMap = new HashMap<>();
 
+    // 储存用
+    private YamlConfiguration config;
+    private File file;
 
     // itemstack
     private List<String> lores;
@@ -40,6 +53,11 @@ public class LotteryData {
         this.dataSection = dataSection;
         this.reward = RewardContainer.getReward(dataName);
         readData();
+    }
+
+    public void giveConfig(YamlConfiguration config, File file) {
+        this.config = config;
+        this.file = file;
     }
 
     public static void initPoolSection(ConfigurationSection section) {
@@ -78,7 +96,7 @@ public class LotteryData {
             text = text.replace("{"+entry.getKey()+"}", String.valueOf(entry.getValue()));
         }
         for (Map.Entry<String, PlayerData> entry : dataPlayerDataMap.entrySet() ) {
-            for ( Map.Entry<String, Object> entry1 : entry.getValue().getDataMap().entrySet() ) {
+            for ( Map.Entry<String, Integer> entry1 : entry.getValue().getDataMap().entrySet() ) {
                 text = text.replace("{"+entry.getKey()+"}", String.valueOf(entry1.getValue()));
             }
         }
@@ -166,6 +184,30 @@ public class LotteryData {
     public void refreshGlobalData() {
         dataServerTime = 0;
         dataSection.set("全服已出此奖品次数", 0);
+        save();
+    }
+
+    public void preExecute(Player player) {
+        reward.preExecute(player);
+        dataPlayerDataMap.get(player.getName()).addTime();
+        if (configMap.containsKey("保底次数") && dataPlayerDataMap.get(player.getName()).check((int) configMap.get("保底次数"))) {
+            FloorUtil.addFloorData(player.getUniqueId(), this);
+            dataPlayerDataMap.get(player.getName()).resetFloorTime();
+        }
+        save();
+    }
+
+    public void execute(Player player) {
+        reward.execute(player);
+    }
+
+    public void save() {
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Bukkit.getLogger().info(Message.ERROR_FILE.getMessage());
+        }
     }
 
     public void refreshPlayerData(Player player) {

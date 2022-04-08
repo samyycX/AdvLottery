@@ -3,16 +3,14 @@ package com.samyyc.lottery.apis;
 import com.samyyc.lottery.Lottery;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-
-  /**
+/**
  * 提供的自定义脚本<br><br>
  * <strong>!!!</strong><br>
  * <strong>需要手动使用</strong>
- * <strong> {@link APIManager#registerAdvLotteryTask(CustomLotteryTask)} 来注册你写的脚本<br> </strong>
+ * <strong> {@link APIManager#registerAdvLotteryTask(ILotteryTask)} 来注册你写的脚本<br> </strong>
  * <strong> {@link APIManager} 对象可以通过 {@link Lottery#getAPI()} 获取 </strong>
  */
-public interface CustomLotteryTask {
+public interface ILotteryTask {
     /**
      * 这是你编写的脚本的标识符<p>
      * 当主程序识别到未知的脚本时，会根据标识符寻找<p>

@@ -1,18 +1,10 @@
 package com.samyyc.lottery.commands;
 
-import com.samyyc.lottery.containers.InventoryContainer;
 import com.samyyc.lottery.enums.Permission;
-import com.samyyc.lottery.objects.LotteryInventory;
-import com.samyyc.lottery.objects.LotteryPool;
-import com.samyyc.lottery.objects.LotteryReward;
-import com.samyyc.lottery.containers.RewardContainer;
-import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.enums.Message;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,7 +17,7 @@ public class CommandListener implements CommandExecutor {
         boolean success = false;
         Method successMethod = null;
 
-        for (Class<?> commandClass : CommandContainer.getCommandClassesSet()) {
+        for (Class<?> commandClass : CommandContainer.getCommandHandlerSet()) {
             for (Method method : commandClass.getDeclaredMethods()) {
                 CommandCondition annotation = method.getAnnotation(CommandCondition.class);
                 if (annotation == null) {

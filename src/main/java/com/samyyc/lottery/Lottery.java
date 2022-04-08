@@ -10,6 +10,7 @@ import com.samyyc.lottery.utils.APIUtils;
 import com.samyyc.lottery.utils.ExtraUtils;
 import com.samyyc.lottery.utils.LogUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Lottery extends JavaPlugin {
@@ -46,7 +47,6 @@ public final class Lottery extends JavaPlugin {
 
         //Bukkit.getScheduler().runTaskTimer(this, () -> System.out.println(GlobalConfig.resultList), 10L, 0L);
         // TODO: 把GlobalConfig.floorList里的东西实装
-
 
     }
 

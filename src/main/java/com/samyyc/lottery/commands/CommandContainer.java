@@ -1,27 +1,30 @@
 package com.samyyc.lottery.commands;
 
-import org.reflections.Reflections;
-
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class CommandContainer {
 
-    private static Set<Class<?>> commandClassesSet = new HashSet<>();
+    private static Set<Class<?>> commandHandlerSet = new HashSet<>();
 
     public static void init() {
-        commandClassesSet = getAllCommandClasses("com.samyyc.lottery.commands");
+        commandHandlerSet = getAllCommandHandler("com.samyyc.lottery.commands");
     }
 
-    public static Set<Class<?>> getAllCommandClasses(String packageName) {
-        Reflections reflections = new Reflections(packageName);
-        return reflections.getTypesAnnotatedWith(Command.class);
+    public static Set<Class<?>> getAllCommandHandler(String packageName) {
+        return new HashSet<Class<?>>() {{
+            add(GuiCommand.class);
+            add(HelpCommand.class);
+            add(InventoryCommand.class);
+            add(PoolCommand.class);
+            add(ReloadCommand.class);
+            add(RewardCommand.class);
+            // 傻逼了，本来想用反射包，但是bukkit不支持
+        }};
     }
 
-    public static Set<Class<?>> getCommandClassesSet() {
-        return commandClassesSet;
+    public static Set<Class<?>> getCommandHandlerSet() {
+        return commandHandlerSet;
     }
 
 }
