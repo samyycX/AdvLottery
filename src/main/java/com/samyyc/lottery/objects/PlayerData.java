@@ -21,6 +21,9 @@ public class PlayerData {
         for ( String key : section.getKeys(false) ) {
             dataMap.put(key, section.getInt(key));
         }
+        if (!section.getKeys(false).contains("玩家已出次数")) {
+            init();
+        }
     }
 
 
@@ -70,6 +73,7 @@ public class PlayerData {
     public int getFloorTime() {
         return dataMap.get("玩家已保底次数");
     }
+
     public void resetFloorTime() {
         section.set("玩家已保底次数", 0);
     }

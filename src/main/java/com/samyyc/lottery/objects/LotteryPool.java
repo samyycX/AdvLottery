@@ -259,12 +259,16 @@ public class LotteryPool {
 
 
     public LotteryData roll(Map<String, LotteryData> dataMap) {
-       return poolData.roll(dataMap);
+        return poolData.roll(dataMap);
     }
 
 
     public LotteryData getDataByItemstack(ItemStack itemStack) {
         return poolData.getDataByItemstack(itemStack);
+    }
+
+    public void increaseRollTime(Player player) {
+        poolData.increaseRollTime(player);
     }
 
     public void refreshPlayerData(Player player) {

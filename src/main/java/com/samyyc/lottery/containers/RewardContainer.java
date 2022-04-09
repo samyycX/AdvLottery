@@ -10,7 +10,7 @@ public class RewardContainer {
     private static final Map<String, LotteryReward> REWARD_MAP = new HashMap<>();
 
     public static LotteryReward getReward(String rewardName) {
-        if (REWARD_MAP.get(rewardName) == null) {
+        if (!rewardName.startsWith("奖品组#") && !REWARD_MAP.containsKey(rewardName)) {
             addReward(rewardName);
         }
         return REWARD_MAP.get(rewardName);

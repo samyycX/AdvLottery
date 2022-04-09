@@ -149,7 +149,9 @@ public class LotteryReward {
                     }
                     break;
                 default:
-                    APIContainer.preRewardMap.get(split[0]).run(player, command);
+                    if (APIContainer.preRewardMap != null && APIContainer.preRewardMap.get(split[0]) != null) {
+                        APIContainer.preRewardMap.get(split[0]).run(player, command);
+                    }
 
             }
         }
@@ -174,6 +176,18 @@ public class LotteryReward {
 
     private String a(String b) {
         return TextUtil.convertColor(b.replaceAll("\\{player}",""));
+    }
+
+    public void resetLores() {
+        ConfigurationSection GUISection = config.getConfigurationSection("gui显示物品");
+        if ( !Objects.isNull(GUISection)) {
+            GUIDisplayItemstack = ExtraUtils.generateItemstackFromYml(GUISection);
+
+        } else {
+            if ( !rewardItemStackMap.isEmpty() ) {
+                GUIDisplayItemstack = rewardItemStackMap.entrySet().iterator().next().getValue();
+            }
+        }
     }
 
 

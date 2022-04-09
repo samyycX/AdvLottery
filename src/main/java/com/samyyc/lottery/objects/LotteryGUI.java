@@ -21,6 +21,7 @@ import org.bukkit.util.FileUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LotteryGUI {
 
@@ -206,17 +207,19 @@ public class LotteryGUI {
                             }
                         }
                     }
+                    System.out.println(processable);
                     for(int i = 0; i < processable.size(); i++) {
                         String statement = processable.get(i);
                         if (statement.startsWith("block-")) {
                             processable.set(i, "");
                             //TODO: 添加变量
                             LotteryScript script = scriptList.get(statement.replace("block-", ""));
+                            AtomicInteger j = new AtomicInteger(i);
                             script.processBlock(variableMap).forEach(s -> {
                                 if (s.startsWith("保底格")) {
                                     processable.add(0, s);
                                 } else {
-                                    processable.add(s);
+                                    processable.add(j.getAndIncrement() ,s);
                                 }
                             });
                         } else {
@@ -288,6 +291,7 @@ public class LotteryGUI {
             switch (type.toLowerCase()) {
                 case "执行脚本":
                     runScript(task.split(" ")[1], player);
+                    pool.increaseRollTime(player);
                     break;
                 case "刷新玩家奖池数据":
                     pool.refreshPlayerData(player);
@@ -303,7 +307,7 @@ public class LotteryGUI {
                     int time = Integer.parseInt(task.split(" ")[1]);
                     for (int i = 0; i < time; i++) {
                         LotteryData data = pool.roll(pool.invalidFilter(player));
-                        data.preExecute(player);
+                        data.preExecute(player, true);
                         data.execute(player);
                     }
                     break;

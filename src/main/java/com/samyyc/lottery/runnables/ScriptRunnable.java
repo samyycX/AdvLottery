@@ -45,19 +45,23 @@ public class ScriptRunnable implements Runnable {
                 LotteryGUI gui = GuiContainer.get(player.getUniqueId());
                 LotteryData data;
                 data = pool.getDataByItemstack(gui.inventory().getItem(targetSlot));
-                LotteryResult result = new LotteryResult(player, targetSlot, data);
+                System.out.println(data);
+                data.preExecute(player, true);
+                LotteryResult result = new LotteryResult(player, targetSlot, data.getReward());
                 GlobalConfig.putResult(player.getUniqueId(), result);
                 // TODO: 优化保底
                 LogUtils.addLog(Message.LOG_ROLL_SUCCESS.getMessage()
                         .replace("{playername}",player.getName())
                         .replace("{poolname}", pool.getName())
-                        .replace("{rewardname}",result.getLotteryData().getReward().getRewardName()));
+                        .replace("{rewardname}",result.getLotteryReward().getRewardName()));
 
                 floorSlots.forEach(slot -> {
                     if (FloorUtil.hasFloorData(player.getUniqueId())) {
                         LotteryData floorData = FloorUtil.getFloorData(player.getUniqueId());
                         inventory.setItem(slot, floorData.getDisplayItemStack());
-                        LotteryResult result1 = new LotteryResult(player, slot, data);
+                        floorData.preExecute(player, false);
+                        LotteryResult result1 = new LotteryResult(player, slot, floorData.getReward());
+                        GlobalConfig.putResult(player.getUniqueId(), result1);
                     }
                 });
                 player.openInventory(inventory);
@@ -115,6 +119,7 @@ public class ScriptRunnable implements Runnable {
                 int slot = Integer.parseInt(script.split(" ")[1]);
                 LotteryGUI gui = GuiContainer.get(player.getUniqueId());
                 gui.inventory().setItem(slot, data.getDisplayItemStack());
+                System.out.println(data);
                 gui.showInventory(player);
                 //player.openInventory(inventory);
             } else if (script.startsWith("消耗前置条件")) {

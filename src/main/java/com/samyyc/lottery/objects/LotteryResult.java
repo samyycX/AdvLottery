@@ -6,32 +6,28 @@ public class LotteryResult {
 
     private final Player player;
     private final int slot;
-    private final LotteryData data;
+    private final LotteryReward reward;
 
-    public LotteryResult(Player player, int slot, LotteryData data) {
+    public LotteryResult(Player player, int slot, LotteryReward reward) {
         this.player = player;
         this.slot = slot;
-        this.data = data;
+        this.reward = reward;
     }
 
     public int getSlot() {
         return slot;
     }
 
-    public LotteryData getLotteryData() {
-        return data;
+    public LotteryReward getLotteryReward() {
+        return reward;
     }
 
     public Player getPlayer() {
         return player;
     }
 
-    public void preExecute() {
-        data.preExecute(player);
-    }
-
     public void execute() {
-        data.execute(player);
+        reward.execute(player);
     }
 
 }

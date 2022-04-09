@@ -2,6 +2,7 @@ package com.samyyc.lottery.utils;
 
 import com.samyyc.lottery.configs.GlobalConfig;
 import com.samyyc.lottery.objects.LotteryData;
+import com.samyyc.lottery.objects.group.LotteryDataGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,9 @@ public class FloorUtil {
     }
 
     public static void addFloorData(UUID uuid, LotteryData data) {
+        if (data instanceof LotteryDataGroup) {
+            ((LotteryDataGroup) data).roll();
+        }
         if (GlobalConfig.floorList.get(uuid) != null) {
             GlobalConfig.floorList.get(uuid).add(data);
         } else {

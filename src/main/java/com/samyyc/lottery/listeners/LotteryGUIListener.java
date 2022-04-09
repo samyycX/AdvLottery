@@ -27,8 +27,6 @@ public class LotteryGUIListener implements Listener {
     @EventHandler
     public static void onPlayerInteractLotteryGUIEvent(InventoryClickEvent e) {
 
-
-
         if (e.getRawSlot() > 53) {e.setCancelled(true);
             return;
         }
@@ -56,7 +54,6 @@ public class LotteryGUIListener implements Listener {
                 while (it.hasNext()) {
                     LotteryResult result = it.next();
                     if (result.getSlot() == e.getSlot()) {
-                        result.preExecute();
                         result.execute();
                         it.remove();
                         e.getClickedInventory().setItem(e.getSlot(), new ItemStack(Material.AIR));
@@ -83,8 +80,7 @@ public class LotteryGUIListener implements Listener {
                 List<LotteryResult> resultList = GlobalConfig.resultList.get(e.getPlayer().getUniqueId());
                 for (LotteryResult result : resultList ) {
                     LotteryInventory lotteryInventory = InventoryContainer.getInventory(e.getPlayer().getUniqueId());
-                    result.preExecute();
-                    lotteryInventory.addReward(result.getLotteryData().getReward());
+                    lotteryInventory.addReward(result.getLotteryReward());
                 }
                 GlobalConfig.resultList.put(e.getPlayer().getUniqueId(), new ArrayList<>());
             }

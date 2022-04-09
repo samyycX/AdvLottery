@@ -2,6 +2,7 @@ package com.samyyc.lottery.objects;
 
 import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.enums.Message;
+import com.samyyc.lottery.objects.group.LotteryDataGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -26,7 +27,7 @@ public class LotteryPoolData {
 
     // 公共数据
     private int globalTotalTime;
-    private Map<String, Integer> playerTotalTimeMap;
+    private Map<String, Integer> playerTotalTimeMap = new HashMap<>();
 
     public LotteryPoolData(String poolName, YamlConfiguration poolConfig) {
         this.poolConfig = poolConfig.getConfigurationSection("奖品列表");
@@ -48,13 +49,28 @@ public class LotteryPoolData {
         if (rewardSection == null) return;
         for ( String rewardName : rewardSection.getKeys(false)) {
             ConfigurationSection poolSection = rewardSection.getConfigurationSection(rewardName);
-            System.out.println(rewardName);
             ConfigurationSection dataSection = dataConfig.getConfigurationSection("奖品数据."+rewardName);
-            LotteryData data = new LotteryData(rewardName, poolSection, dataSection);
+            if (dataSection == null) {
+                dataSection = dataConfig.createSection("奖品数据."+rewardName);
+                save();
+            }
+
+            LotteryData data;
+
+            System.out.println(dataSection);
+            System.out.println(rewardName);
+            if (!rewardName.startsWith("奖品组#")) {
+                data = new LotteryData(rewardName, poolSection, dataSection);
+
+            } else {
+                data = new LotteryDataGroup(rewardName, poolSection, dataSection);
+
+            }
             data.giveConfig(dataConfig, file);
             dataMap.put(rewardName, data);
         }
     }
+
 
     public LotteryData roll(Map<String, LotteryData> dataMap) {
 
@@ -67,6 +83,9 @@ public class LotteryPoolData {
         for (LotteryData data : dataMap.values() ) {
             rand -= data.getRealProbability();
             if (rand<=0) {
+                if (data instanceof LotteryDataGroup) {
+                    ((LotteryDataGroup) data).roll();
+                }
                 return data;
             }
         }
@@ -121,15 +140,29 @@ public class LotteryPoolData {
     }
 
     public LotteryData getDataByItemstack(ItemStack itemStack) {
-        for ( LotteryData data : dataMap.values() ) {
-            if (data.getDisplayItemStack().getType().equals(itemStack.getType())
-                &&
-                data.getDisplayItemStack().getItemMeta().getDisplayName().equals(itemStack.getItemMeta().getDisplayName())
-                &&
-                data.getDisplayItemStack().getAmount() == itemStack.getAmount()
-                )   {
-                return data;
+        System.out.println(itemStack);
+        if (itemStack == null) return null;
+        if (itemStack.getItemMeta().getLore().get(itemStack.getItemMeta().getLore().size()-1).startsWith("§a属于奖品组: ")) {
+            String groupName = "奖品组#"+itemStack.getItemMeta().getLore().get(itemStack.getItemMeta().getLore().size()-1).replace("§a属于奖品组: ", "");
+            System.out.println(groupName);
+            System.out.println(dataMap);
+            if (dataMap.get(groupName) != null) {
+                LotteryDataGroup group = (LotteryDataGroup) dataMap.get(groupName);
+                System.out.println(group.getDataByItemStack(itemStack));
+                return group.getDataByItemStack(itemStack);
             }
+        }
+        for ( LotteryData data : dataMap.values() ) {
+           if (!(data instanceof LotteryDataGroup)) {
+               if (data.getDisplayItemStack().getType().equals(itemStack.getType())
+                       &&
+                       data.getDisplayItemStack().getItemMeta().getDisplayName().equals(itemStack.getItemMeta().getDisplayName())
+                       &&
+                       data.getDisplayItemStack().getAmount() == itemStack.getAmount()
+               )   {
+                   return data;
+               }
+           }
         }
         return null;
     }
@@ -160,5 +193,16 @@ public class LotteryPoolData {
     }
 
 
-
+    public void increaseRollTime(Player player) {
+        globalTotalTime++;
+        dataConfig.set("全服已抽此奖池次数", globalTotalTime);
+        if (playerTotalTimeMap.get(player.getName()) == null) {
+            dataConfig.getConfigurationSection("玩家已抽此奖池次数").set(player.getName(), 0);
+            playerTotalTimeMap.put(player.getName(), 0);
+        }
+        int playerTime = playerTotalTimeMap.get(player.getName());
+        playerTotalTimeMap.put(player.getName(), ++playerTime);
+        dataConfig.getConfigurationSection("玩家已抽此奖池次数").set(player.getName(), playerTime);
+        save();
+    }
 }

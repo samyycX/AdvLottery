@@ -14,8 +14,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import sun.applet.resources.MsgAppletViewer_es;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,12 +50,13 @@ public class LotteryData {
         this.poolSection = poolSection;
         this.dataSection = dataSection;
         this.reward = RewardContainer.getReward(dataName);
-        readData();
+
     }
 
     public void giveConfig(YamlConfiguration config, File file) {
         this.config = config;
         this.file = file;
+        readData();
     }
 
     public static void initPoolSection(ConfigurationSection section) {
@@ -84,14 +83,18 @@ public class LotteryData {
         }
         dataServerTime = dataSection.getInt("全服已出此奖品次数");
         ConfigurationSection section = dataSection.getConfigurationSection("玩家数据");
+        if (section == null) {
+            section = dataSection.createSection("玩家数据");
+        }
         for (String playerName : section.getKeys(false)) {
             ConfigurationSection playerSection = section.getConfigurationSection(playerName);
             PlayerData playerData = new PlayerData(playerSection);
+            save();
             dataPlayerDataMap.put(playerName, playerData);
         }
     }
 
-    private String replaceData(String text) {
+    protected String replaceData(String text) {
         for (Map.Entry<String, Object> entry : configMap.entrySet() ) {
             text = text.replace("{"+entry.getKey()+"}", String.valueOf(entry.getValue()));
         }
@@ -153,28 +156,40 @@ public class LotteryData {
                     return false;
                 }
             }
+            if (dataSection.getConfigurationSection("玩家数据."+player.getName()) == null) {
+                dataSection.getConfigurationSection("玩家数据").createSection(player.getName());
+                save();
+            }
+            if (dataPlayerDataMap.get(player.getName()) == null) {
+                PlayerData data = new PlayerData(dataSection.getConfigurationSection("玩家数据."+player.getName()));
+                data.init();
+                save();
+                dataPlayerDataMap.put(player.getName(), data);
+            }
             if (key.equalsIgnoreCase("玩家限制数量")) {
                 Object a = dataPlayerDataMap.get(player.getName()).getAttribute("玩家已出次数");
                 if (a != null) {
-                    int time = (int) a;
+                    int time = Integer.parseInt(String.valueOf(a));
                     int limit = poolSection.getInt(key);
                     if (time > limit) {
                         return false;
                     }
                 } else {
                     dataPlayerDataMap.get(player.getName()).init();
+                    save();
                 }
             }
             if (key.equalsIgnoreCase("保底限量")) {
                 Object a = dataPlayerDataMap.get(player.getName()).getAttribute("玩家已出保底次数");
                 if (a != null) {
-                    int time = (int) a;
+                    int time = Integer.parseInt(String.valueOf(a));
                     int limit = poolSection.getInt(key);
                     if (time > limit) {
                         return false;
                     }
                 } else {
                     dataPlayerDataMap.get(player.getName()).init();
+                    save();
                 }
             }
         }
@@ -187,12 +202,30 @@ public class LotteryData {
         save();
     }
 
-    public void preExecute(Player player) {
+    public void preExecute(Player player, boolean needToIncreaseFlooredTime) {
+        System.out.println(dataName);
         reward.preExecute(player);
         dataPlayerDataMap.get(player.getName()).addTime();
         if (configMap.containsKey("保底次数") && dataPlayerDataMap.get(player.getName()).check((int) configMap.get("保底次数"))) {
             FloorUtil.addFloorData(player.getUniqueId(), this);
             dataPlayerDataMap.get(player.getName()).resetFloorTime();
+            if (needToIncreaseFlooredTime) {
+                dataPlayerDataMap.get(player.getName()).addFlooredTime();
+            }
+        }
+        save();
+    }
+
+    public void preExecuteForGroup(Player player, LotteryReward reward, boolean needToIncreaseFlooredTime) {
+        System.out.println(dataName);
+        reward.preExecute(player);
+        dataPlayerDataMap.get(player.getName()).addTime();
+        if (configMap.containsKey("保底次数") && dataPlayerDataMap.get(player.getName()).check((int) configMap.get("保底次数"))) {
+            FloorUtil.addFloorData(player.getUniqueId(), this);
+            dataPlayerDataMap.get(player.getName()).resetFloorTime();
+            if (needToIncreaseFlooredTime) {
+                dataPlayerDataMap.get(player.getName()).addFlooredTime();
+            }
         }
         save();
     }
@@ -215,10 +248,18 @@ public class LotteryData {
     }
 
     public int getRealProbability() {
-        return (int) configMap.get("真实概率");
+        return Integer.parseInt(String.valueOf(configMap.get("真实概率")));
     }
 
     public LotteryReward getReward() {
         return reward;
+    }
+
+    public List<String> getLores() {
+        return lores;
+    }
+
+    public String getDataName() {
+        return dataName;
     }
 }

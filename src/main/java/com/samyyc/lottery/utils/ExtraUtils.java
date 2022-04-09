@@ -2,10 +2,7 @@ package com.samyyc.lottery.utils;
 
 import com.samyyc.lottery.Lottery;
 import com.samyyc.lottery.configs.GlobalConfig;
-import com.samyyc.lottery.containers.GuiContainer;
-import com.samyyc.lottery.containers.InventoryContainer;
-import com.samyyc.lottery.containers.PoolContainer;
-import com.samyyc.lottery.containers.RewardContainer;
+import com.samyyc.lottery.containers.*;
 import com.samyyc.lottery.enums.Message;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -289,6 +286,10 @@ public class ExtraUtils {
             folder = new File(instance.getDataFolder(), "奖品");
             folder.mkdir();
             instance.saveResource("奖品\\example.yml", false);
+
+            folder = new File(instance.getDataFolder(), "奖品组");
+            folder.mkdir();
+            instance.saveResource("奖品组\\example.yml", false);
 
             new File(instance.getDataFolder(), "背包").mkdir();
             new File(instance.getDataFolder(), "数据").mkdir();
