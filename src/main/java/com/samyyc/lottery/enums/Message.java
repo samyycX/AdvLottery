@@ -35,6 +35,10 @@ public enum Message {
     SUCCESS_ADD_ITEM("&a奖品添加成功!&c(如果奖品已在配置中存在，将不会做出任何改变)"),
     SUCCESS_SET_ITEM("&a成功设置物品！"),
 
+    SUCCESS_GROUP_CREATE("&a奖品组创建成功!"),
+    SUCCESS_GROUP_ADD("&a添加奖品成功!"),
+    SUCCESS_GROUP_REMOVE("&a移除奖品成功!"),
+
     SUCCESS_API_HOOK_VAULT("&a已找到并成功链接Vault插件!"),
     SUCCESS_API_HOOK_PLAYERPOINTS("&a已找到并成功链接PlayerPoints插件!"),
     SUCCESS_API_HOOK_PLACEHOLDERAPI("&a已找到并成功链接PlaceHolderAPI插件!"),

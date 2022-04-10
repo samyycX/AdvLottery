@@ -66,7 +66,6 @@ public class ScriptRunnable implements Runnable {
                 });
                 player.openInventory(inventory);
 
-
             } else if (script.startsWith("轮换物品")) {
                 String[] split = script.split(" ");
                 int originSlot;

@@ -1,9 +1,10 @@
-package com.samyyc.lottery.commands;
+package com.samyyc.lottery.commands.command;
 
+import com.samyyc.lottery.commands.handler.Command;
+import com.samyyc.lottery.commands.handler.CommandCondition;
 import com.samyyc.lottery.containers.InventoryContainer;
 import com.samyyc.lottery.enums.Permission;
 import com.samyyc.lottery.objects.LotteryInventory;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

@@ -1,4 +1,4 @@
-package com.samyyc.lottery.commands;
+package com.samyyc.lottery.commands.handler;
 
 import com.samyyc.lottery.enums.Permission;
 import com.samyyc.lottery.enums.Message;

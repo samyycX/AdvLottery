@@ -57,8 +57,6 @@ public class LotteryPoolData {
 
             LotteryData data;
 
-            System.out.println(dataSection);
-            System.out.println(rewardName);
             if (!rewardName.startsWith("奖品组#")) {
                 data = new LotteryData(rewardName, poolSection, dataSection);
 
@@ -173,6 +171,10 @@ public class LotteryPoolData {
         if (poolSection == null) {
             poolSection = poolConfig.createSection(rewardName);
             LotteryData.initPoolSection(poolSection);
+            save();
+        }
+        if (dataSection == null) {
+            dataSection = LotteryData.initDataSection(dataConfig.createSection("奖品数据."+rewardName));
             save();
         }
         LotteryData data = new LotteryData(rewardName, poolSection, dataSection);

@@ -1,4 +1,4 @@
-package com.samyyc.lottery.commands;
+package com.samyyc.lottery.commands.handler;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

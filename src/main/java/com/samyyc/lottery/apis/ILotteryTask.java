@@ -36,7 +36,7 @@ public interface ILotteryTask {
      * 当你在<strong>奖池</strong>中定义自定义方法时，check方法<strong>会被执行</strong><br>
      * 当你在<strong>奖品</strong>中定义奖励结果时，check方法<strong>不会被执行</strong><br>
      * @param player 提供的玩家对象
-     * @param task 提供的脚本文本 (例: "测试脚本 10")
+     * @param task 提供的脚本文本 (例: "测试脚本 10") (<strong>注意: "测试脚本"也被包括在内</strong>)
      * @param times 你的前置条件被执行的次数， 例如10连抽时times=10
      * @return 检查是否成功
      */

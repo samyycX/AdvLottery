@@ -1,5 +1,7 @@
-package com.samyyc.lottery.commands;
+package com.samyyc.lottery.commands.command;
 
+import com.samyyc.lottery.commands.handler.Command;
+import com.samyyc.lottery.commands.handler.CommandCondition;
 import com.samyyc.lottery.containers.PoolContainer;
 import com.samyyc.lottery.objects.LotteryPool;
 import com.samyyc.lottery.enums.Message;

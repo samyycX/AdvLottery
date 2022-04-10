@@ -1,4 +1,6 @@
-package com.samyyc.lottery.commands;
+package com.samyyc.lottery.commands.handler;
+
+import com.samyyc.lottery.commands.command.*;
 
 import java.util.HashSet;
 import java.util.Set;

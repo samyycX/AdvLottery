@@ -1,5 +1,7 @@
-package com.samyyc.lottery.commands;
+package com.samyyc.lottery.commands.command;
 
+import com.samyyc.lottery.commands.handler.Command;
+import com.samyyc.lottery.commands.handler.CommandCondition;
 import com.samyyc.lottery.containers.RewardContainer;
 import com.samyyc.lottery.objects.LotteryReward;
 import com.samyyc.lottery.enums.Message;
@@ -30,4 +32,5 @@ public class RewardCommand {
         reward.setItem(args[3], player.getInventory().getItemInMainHand());
         player.sendMessage(Message.SUCCESS_SET_ITEM.getMessage());
     }
+
 }

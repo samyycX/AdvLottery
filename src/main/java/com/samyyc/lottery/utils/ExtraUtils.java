@@ -160,6 +160,9 @@ public class ExtraUtils {
         messageList.add("&b/advlottery reward <奖品名> create &e#创建奖品");
         messageList.add("&b/advlottery reward <奖品名> setdisplayitem &e#设置显示物品");
         messageList.add("&b/advlottery reward <奖品名> setitem <物品名> &e#设置物品");
+        messageList.add("&b/advlottery poollist [页数] &e#获取所有奖池");
+        messageList.add("&b/advlottery rewardlist [页数] &e#获取所有奖品");
+        messageList.add("&b/advlottery grouplist [页数] &e#获取所有奖品组");
         messageList.add("&b/advlottery reload &e#重载所有配置");
         messageList.add("&a==========================================");
         messageList = TextUtil.convertColor(messageList);
@@ -167,48 +170,12 @@ public class ExtraUtils {
 
     }
 
-    @Deprecated
-    public static HashMap<Integer, ItemStack> insertItem(Map<Integer, ItemStack> map, ItemStack inserted) {
-        HashMap<Integer, ItemStack> newMap = new LinkedHashMap<>();
-        int i = 0;
-        ItemStack lastElement = null;
-        for (Map.Entry<Integer, ItemStack> entry : map.entrySet()) {
-            if (i == 0) {
-                lastElement = entry.getValue();
-                entry.setValue(inserted);
-            } else {
-                ItemStack element = entry.getValue();
-                entry.setValue(lastElement);
-                lastElement = element;
-            }
-            newMap.put(entry.getKey(), entry.getValue());
-            i++;
-
-        }
-        return newMap;
-    }
-
-    public static String replaceAll(String text, String regex, Object replacement) {
-        if (replacement != null) {
-            return text.replaceAll(regex, String.valueOf(replacement));
-        } else {
-            return text.replaceAll(regex, "");
-        }
-    }
-
-    @Deprecated
-    public static byte[] delete(int index, byte[] array) {
-        byte[] arrNew = new byte[array.length - 1];
-        if (array.length - 1 - index >= 0) System.arraycopy(array, index + 1, array, index, array.length - 1 - index);
-        System.arraycopy(array, 0, arrNew, 0, arrNew.length);
-        return arrNew;
-    }
-
-    public static String Insert(int start, int end, String text, String original) {
-        StringBuilder buffer = new StringBuilder(original);
-        buffer.replace(start, end, text);
-        return buffer.toString();
-
+    public static List<String> iDontKnowHowToNameThisMethod(String title, List<String> a) {
+        List<String> b = new ArrayList<>();
+        b.add(TextUtil.convertColor("&a=========="+title+"=========="));
+        b.addAll(a);
+        b.add(TextUtil.convertColor("&a=========================="));
+        return b;
     }
 
     public static String processStatement(String statement, Map<String, String> variableMap) {

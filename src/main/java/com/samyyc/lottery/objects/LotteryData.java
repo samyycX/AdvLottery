@@ -69,6 +69,12 @@ public class LotteryData {
         section.set("lores", new ArrayList<String>(){{add("test");}});
     }
 
+    public static ConfigurationSection initDataSection(ConfigurationSection section) {
+        section.set("全服已出此奖品次数", 0);
+        section.createSection("玩家数据");
+        return section;
+    }
+
     public void readData() {
         for (String key : poolSection.getKeys(false) ) {
             if (!key.equalsIgnoreCase("lores")) {

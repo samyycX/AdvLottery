@@ -45,10 +45,14 @@ public class PlayerData {
         section.set("玩家已出保底次数", 0);
     }
 
-    public void init() {
+    public static void init(ConfigurationSection section) {
         section.set("玩家已出次数", 0);
         section.set("玩家已保底次数", 0);
         section.set("玩家已出保底次数", 0);
+    }
+
+    public void init() {
+        init(this.section);
     }
 
     public void addTime() {

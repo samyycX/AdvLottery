@@ -10,10 +10,17 @@ public enum Permission {
 
     PERM_POOL_CREATE("bukkit.op"),
     PERM_POOL_ADDREWARD("bukkit.op"),
+    PERM_POOL_SHOWLIST("bukkit.op"),
 
     PERM_REWARD_CREATE("bukkit.op"),
     PERM_REWARD_SETDISPLAYITEM("bukkit.op"),
     PERM_REWARD_SETITEM("bukkit.op"),
+    PERM_REWARD_SHOWLIST("bukkit.op"),
+
+    PERM_GROUP_CREATE("bukkit.op"),
+    PERM_GROUP_ADD("bukkit.op"),
+    PERM_GROUP_REMOVE("bukkit.op"),
+    PERM_GROUP_SHOWLIST("bukkit.op"),
 
     PERM_INVENTORY_USE(PERM_DEFAULT),
 

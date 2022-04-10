@@ -301,7 +301,9 @@ public class LotteryGUI {
                     break;
                 case "消耗前置条件":
                     int times = Integer.parseInt(task.split(" ")[1]);
-                    pool.runRequirement(player, times, pool.getDefaultRequirement());
+                    if (!pool.runRequirement(player, times, pool.getDefaultRequirement())) {
+                        return;
+                    }
                     break;
                 case "直接抽奖":
                     int time = Integer.parseInt(task.split(" ")[1]);
